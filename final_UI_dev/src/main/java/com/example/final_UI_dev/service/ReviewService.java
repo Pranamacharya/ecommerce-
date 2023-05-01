@@ -5,6 +5,7 @@ import com.example.final_UI_dev.repository.ReviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -31,6 +32,17 @@ public class ReviewService {
 
     public void deleteReview(Integer id) {
         reviewRepository.deleteById(id);
+    }
+
+    public List<Review> getReviewsByProductId(Integer productId) {
+        List<Review> allReviews = reviewRepository.findAll();
+        List<Review> AllReviewByProductId = new ArrayList<>();
+        for(Review r : allReviews){
+            if(r.getProduct().getProductId()==productId){
+                AllReviewByProductId.add(r);
+            }
+        }
+        return AllReviewByProductId;
     }
 }
 
