@@ -1,12 +1,9 @@
 package com.example.final_UI_dev.service;
 
-
-
 import com.example.final_UI_dev.entity.Products;
 import com.example.final_UI_dev.repository.ProductsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
 
