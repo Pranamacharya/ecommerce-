@@ -29,6 +29,19 @@ public class Products {
     @Column(name = "stock")
     private int stock;
 
+    public Products(int productId, String name, String description, long price, String category, String imageUrl, int stock) {
+        this.productId = productId;
+        this.name = name;
+        this.description = description;
+        this.price = price;
+        this.category = category;
+        this.imageUrl = imageUrl;
+        this.stock = stock;
+    }
+
+    public Products() {
+    }
+
     public int getProductId() {
         return productId;
     }
