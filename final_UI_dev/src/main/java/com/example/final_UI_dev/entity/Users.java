@@ -97,6 +97,5 @@ public class Users {
         this.authenticated = authenticated;
     }
 
-    //changes
 
 }
