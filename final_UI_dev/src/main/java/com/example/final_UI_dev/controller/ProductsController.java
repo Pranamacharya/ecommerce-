@@ -44,14 +44,14 @@ public class ProductsController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @PutMapping("/{productId}")
+    /*@PutMapping("/{productId}")
     public ResponseEntity<Products> updateProduct(@PathVariable("productId") int productId, @RequestBody Products updatedProduct) {
         Products product = productsService.updateProduct(productId, updatedProduct);
         if (product != null) {
             return new ResponseEntity<>(product, HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }
+    }*/
 
 }
 

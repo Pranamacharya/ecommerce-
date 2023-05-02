@@ -29,7 +29,7 @@ public class ProductsService {
         productsRepository.deleteById(productId);
     }
 
-    public Products updateProduct(int productId, Products updatedProduct) {
+/*    public Products updateProduct(int productId, Products updatedProduct) {
         Optional<Products> existingProduct = productsRepository.findById(productId);
         if (existingProduct.isPresent()) {
             Products product = existingProduct.get();
@@ -39,9 +39,10 @@ public class ProductsService {
             product.setCategory(updatedProduct.getCategory());
             product.setImageUrl(updatedProduct.getImageUrl());
             product.setStock(updatedProduct.getStock());
+
             return productsRepository.save(product);
         }
         return null;
-    }
+    }*/
 
 }

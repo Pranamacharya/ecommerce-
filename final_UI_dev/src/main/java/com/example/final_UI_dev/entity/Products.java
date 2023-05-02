@@ -20,23 +20,29 @@ public class Products {
     @Column(name = "price")
     private long price;
 
-    @Column(name = "category")
-    private String category;
-
     @Column(name = "image_url")
     private String imageUrl;
 
     @Column(name = "stock")
     private int stock;
 
-    public Products(int productId, String name, String description, long price, String category, String imageUrl, int stock) {
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "category_id", referencedColumnName = "category_id")
+    private Category category;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "brand_id", referencedColumnName = "brand_id")
+    private Brand brand;
+
+    public Products(int productId, String name, String description, long price, String imageUrl, int stock, Category category, Brand brand) {
         this.productId = productId;
         this.name = name;
         this.description = description;
         this.price = price;
-        this.category = category;
         this.imageUrl = imageUrl;
         this.stock = stock;
+        this.category = category;
+        this.brand = brand;
     }
 
     public Products() {
@@ -74,14 +80,6 @@ public class Products {
         this.price = price;
     }
 
-    public String getCategory() {
-        return category;
-    }
-
-    public void setCategory(String category) {
-        this.category = category;
-    }
-
     public String getImageUrl() {
         return imageUrl;
     }
@@ -98,5 +96,20 @@ public class Products {
         this.stock = stock;
     }
 
+    public Category getCategory() {
+        return category;
+    }
+
+    public void setCategory(Category category) {
+        this.category = category;
+    }
+
+    public Brand getBrand() {
+        return brand;
+    }
+
+    public void setBrand(Brand brand) {
+        this.brand = brand;
+    }
 }
 
