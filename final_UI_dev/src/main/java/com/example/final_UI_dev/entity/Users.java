@@ -96,4 +96,5 @@ public class Users {
     public void setAuthenticated(String authenticated) {
         this.authenticated = authenticated;
     }
+
 }

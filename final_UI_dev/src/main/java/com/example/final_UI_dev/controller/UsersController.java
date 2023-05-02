@@ -1,7 +1,6 @@
 package com.example.final_UI_dev.controller;
 
 import com.example.final_UI_dev.entity.Users;
-import com.example.final_UI_dev.service.ItemsService;
 import com.example.final_UI_dev.service.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -28,9 +27,6 @@ public class UsersController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
-
-    @Autowired
-    private ItemsService itemsService;
 
 
 }
