@@ -19,14 +19,14 @@ public class Category {
     @Column(name = "image_url")
     private String imageUrl;
 
-    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Products> products;
+//    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<Products> products;
 
-    public Category(Integer categoryId, String name, String imageUrl, List<Products> products) {
+    public Category(Integer categoryId, String name, String imageUrl) {
         this.categoryId = categoryId;
         this.name = name;
         this.imageUrl = imageUrl;
-        this.products = products;
+        //this.products = products;
     }
 
     public Category() {
@@ -56,11 +56,11 @@ public class Category {
         this.imageUrl = imageUrl;
     }
 
-    public List<Products> getProducts() {
+    /*public List<Products> getProducts() {
         return products;
     }
 
     public void setProducts(List<Products> products) {
         this.products = products;
-    }
+    }*/
 }
