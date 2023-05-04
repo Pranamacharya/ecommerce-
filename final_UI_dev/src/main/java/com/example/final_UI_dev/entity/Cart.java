@@ -17,8 +17,11 @@ public class Cart {
     @JoinColumn(name = "user_id", nullable = false)
     private Users user;
 
-    @OneToMany(mappedBy = "cart", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<CartItem> cartItems = new ArrayList<>();
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "Cart_Items",
+            joinColumns = @JoinColumn(name = "cart_id"),
+            inverseJoinColumns = @JoinColumn(name = "product_id"))
+    private List<Products> products;
 
     public Cart(Integer cartId, Users user) {
         this.cartId = cartId;
@@ -48,22 +51,12 @@ public class Cart {
         this.user = user;
     }
 
-    public List<CartItem> getCartItems() {
-        return cartItems;
+    public List<Products> getProducts() {
+        return products;
     }
 
-    public void setCartItems(List<CartItem> cartItems) {
-        this.cartItems = cartItems;
-    }
-
-    public void addCartItem(CartItem cartItem) {
-        cartItems.add(cartItem);
-        cartItem.setCart(this);
-    }
-
-    public void removeCartItem(CartItem cartItem) {
-        cartItems.remove(cartItem);
-        cartItem.setCart(null);
+    public void setProducts(List<Products> products) {
+        this.products = products;
     }
 }
 
