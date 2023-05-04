@@ -22,28 +22,22 @@ public class CartController {
         Cart cart = cartService.getCartByUserId(userId);
         return ResponseEntity.ok(cart);
     }
+
     @PostMapping("/{userId}/{productId}")
-    public ResponseEntity<Cart> addProductToCart(@PathVariable int userId, @PathVariable int productId) {
-        Cart cart = cartService.addProductToCart(userId, productId);
-        return ResponseEntity.ok(cart);
-    }
-
-
-    @PostMapping("/{productId}")
-    public ResponseEntity<Void> addProductToCart(@AuthenticationPrincipal User user, @PathVariable int productId) {
-        cartService.addProductToCart(user, productId);
+    public ResponseEntity<Void> addProductToCart( @PathVariable int userId, @PathVariable int productId) {
+        cartService.addProductToCart(userId, productId);
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping("/{productId}")
-    public ResponseEntity<Void> removeProductFromCart(@AuthenticationPrincipal User user, @PathVariable int productId) {
-        cartService.removeProductFromCart(user, productId);
+    @DeleteMapping("/{userId}/{productId}")
+    public ResponseEntity<Void> removeProductFromCart( @PathVariable int userId, @PathVariable int productId) {
+        cartService.removeProductFromCart(userId, productId);
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping
-    public ResponseEntity<Void> clearCart(@AuthenticationPrincipal User user) {
-        cartService.clearCart(user);
+    @DeleteMapping("/userId")
+    public ResponseEntity<Void> clearCart( @PathVariable int userId) {
+        cartService.clearCart(userId);
         return ResponseEntity.ok().build();
     }
 
