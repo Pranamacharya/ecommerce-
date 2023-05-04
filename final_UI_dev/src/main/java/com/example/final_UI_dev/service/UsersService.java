@@ -36,9 +36,10 @@ public class UsersService {
         {
 
             usersRepository.save(userEntity);
-            Cart cart = new Cart();
+           /* Cart cart = new Cart();
             cart.setUser(userEntity);
-            cartRepository.save(cart);
+            cartRepository.save(cart);*/
+
             //  ConfirmationToken confirmationToken = new ConfirmationToken(userEntity);
             //  confirmationTokenRepository.save(confirmationToken);
 
