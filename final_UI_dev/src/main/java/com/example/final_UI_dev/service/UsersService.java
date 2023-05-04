@@ -1,6 +1,8 @@
 package com.example.final_UI_dev.service;
 
+import com.example.final_UI_dev.entity.Cart;
 import com.example.final_UI_dev.entity.Users;
+import com.example.final_UI_dev.repository.CartRepository;
 import com.example.final_UI_dev.repository.UsersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -20,10 +22,9 @@ public class UsersService {
         return usersRepository.findAll();
     }
 
-   /* public Object saveNewUser(Users users) {
-        return usersRepository.save(users);
-    }*/
 
+   @Autowired
+   private CartRepository cartRepository;
     public ResponseEntity<?> saveNewUser(Users userEntity) {
         Users existingUser = usersRepository.findByEmailIgnoreCase(userEntity.getEmail());
         if(existingUser != null)
@@ -33,7 +34,11 @@ public class UsersService {
         }
         else
         {
+
             usersRepository.save(userEntity);
+            Cart cart = new Cart();
+            cart.setUser(userEntity);
+            cartRepository.save(cart);
             //  ConfirmationToken confirmationToken = new ConfirmationToken(userEntity);
             //  confirmationTokenRepository.save(confirmationToken);
 

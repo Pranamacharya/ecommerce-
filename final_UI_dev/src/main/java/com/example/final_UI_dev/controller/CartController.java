@@ -3,11 +3,15 @@ package com.example.final_UI_dev.controller;
 import com.example.final_UI_dev.entity.Cart;
 import com.example.final_UI_dev.entity.CartItem;
 import com.example.final_UI_dev.entity.Users;
+import com.example.final_UI_dev.repository.CartRepository;
+import com.example.final_UI_dev.repository.UsersRepository;
 import com.example.final_UI_dev.service.CartService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/carts")
@@ -15,6 +19,25 @@ public class CartController {
 
     @Autowired
     private CartService cartService;
+
+    @Autowired
+    private UsersRepository usersRepository;
+
+    @Autowired
+    private CartRepository cartRepository;
+
+    @PostMapping("/{userId}")
+    public ResponseEntity<String> createCartByUser(@PathVariable Integer userId) {
+        Optional<Users> userOptional = usersRepository.findById(userId);
+        if (!userOptional.isPresent()) {
+            return ResponseEntity.badRequest().body("User with ID " + userId + " does not exist.");
+        }
+        Users user = userOptional.get();
+        Cart cart = new Cart();
+        cart.setUser(user);
+        cartRepository.save(cart);
+        return ResponseEntity.ok("Cart created successfully for user with ID " + userId);
+    }
 
 
     @GetMapping("/{userId}")
