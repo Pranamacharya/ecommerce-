@@ -34,11 +34,11 @@ public class UsersService {
         }
         else
         {
-
             usersRepository.save(userEntity);
-           /* Cart cart = new Cart();
-            cart.setUser(userEntity);
-            cartRepository.save(cart);*/
+            Users user = usersRepository.findByEmailIgnoreCase(userEntity.getEmail());
+            Cart cart = new Cart();
+            cart.setUser(user);
+            cartRepository.save(cart);
 
             //  ConfirmationToken confirmationToken = new ConfirmationToken(userEntity);
             //  confirmationTokenRepository.save(confirmationToken);

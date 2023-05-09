@@ -23,8 +23,8 @@ public class  CartService {
     @Autowired
     private  ProductsService productService;
 
-@Autowired
-private ProductsRepository productsRepository;
+    @Autowired
+    private ProductsRepository productsRepository;
 
     public Cart getCartByUserId(int userId) {
         return cartRepository.findById(userId)
