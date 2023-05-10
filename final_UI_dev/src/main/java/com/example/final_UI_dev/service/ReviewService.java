@@ -1,5 +1,6 @@
 package com.example.final_UI_dev.service;
 
+import com.example.final_UI_dev.entity.Products;
 import com.example.final_UI_dev.entity.Review;
 import com.example.final_UI_dev.repository.ReviewRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,6 +46,20 @@ public class ReviewService {
             }
         }
         return AllReviewByProductId;
+    }
+    @Autowired
+    private ProductsService productsService;
+    public double getAverageRatingForProduct(int productId) {
+        Products products = productsService.getProductById(productId).orElse(null);
+        List<Review> reviews = reviewRepository.findByProduct(products);
+        if (reviews.isEmpty()) {
+            return 0.0;
+        }
+        double sum = 0.0;
+        for (Review review : reviews) {
+            sum += review.getRating();
+        }
+        return sum / reviews.size();
     }
 }
 

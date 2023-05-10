@@ -34,4 +34,9 @@ public class ReviewController {
         reviewService.deleteReview(reviewId);
     }
 
+    @GetMapping("/{productId}/avg-rating")
+    public double getAverageRatingForProduct(@PathVariable int productId) {
+        return reviewService.getAverageRatingForProduct(productId);
+    }
+
 }

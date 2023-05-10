@@ -1,7 +1,7 @@
 # Ecommerce 
 
 # Technologies Used
-- Java 8
+- Java 17
 - Spring Boot
 - MySQL
 - Maven
@@ -17,3 +17,4 @@ The following Reviews API endpoints are available:
 - POST  : http://localhost:8080/reviews - Create a new review.
 - PUT :  http://localhost:8080/reviews/{reviewId} - Update an existing review by its ID.
 - DELETE  : http://localhost:8080/reviews/{reviewId} - Delete a review by its ID.
+- GET : http://localhost:8080/reviews/{productId}/avg-rating - get avg reviews of a product by product id
