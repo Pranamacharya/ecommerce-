@@ -24,11 +24,6 @@ public class ReviewController {
         return reviewService.getReviewsByProductId(productId);
     }
 
-//    @GetMapping("/user/{userId}")
-//    public List<Review> getReviewsByUserId(@PathVariable Integer userId) {
-//        return reviewService.getReviewsByUserId(userId);
-//    }
-
     @PostMapping
     public Review createReview(@RequestBody Review review) {
         return reviewService.save(review);
@@ -38,4 +33,5 @@ public class ReviewController {
     public void deleteReview(@PathVariable Integer reviewId) {
         reviewService.deleteReview(reviewId);
     }
+
 }

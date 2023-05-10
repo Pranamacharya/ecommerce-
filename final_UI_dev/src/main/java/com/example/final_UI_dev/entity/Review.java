@@ -13,11 +13,11 @@ public class Review {
     @Column(name = "review_id")
     private Integer reviewId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     private Users user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "product_id", referencedColumnName = "product_id")
     private Products product;
 
@@ -29,6 +29,25 @@ public class Review {
 
     @Column(name = "review_date")
     private Date reviewDate;
+
+    public Review() {
+    }
+
+    public Review(Integer reviewId, Users user, Products product, Integer rating, String comment, Date reviewDate) {
+        this.reviewId = reviewId;
+        this.user = user;
+        this.product = product;
+        this.rating = rating;
+        this.comment = comment;
+        this.reviewDate = reviewDate;
+    }
+
+    public Review(Users user, Products product, Integer rating, String comment) {
+        this.user = user;
+        this.product = product;
+        this.rating = rating;
+        this.comment = comment;
+    }
 
     public Integer getReviewId() {
         return reviewId;
