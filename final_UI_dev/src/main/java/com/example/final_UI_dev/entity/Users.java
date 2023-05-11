@@ -13,8 +13,6 @@ public class Users {
     @Column(name = "name", nullable = false, length = 50)
     private String name;
 
-    @Column(name = "phone", nullable = false, length = 50, unique = true)
-    private String phone;
 
     @Column(name = "email", nullable = false, length = 100, unique = true)
     private String email;
@@ -44,14 +42,6 @@ public class Users {
         this.name = name;
     }
 
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
     public String getEmail() {
         return email;
     }
@@ -78,9 +68,8 @@ public class Users {
 
     // constructor
 
-    public Users(String name, String phone, String email, String password, String roles) {
+    public Users(String name, String email, String password, String roles) {
         this.name = name;
-        this.phone = phone;
         this.email = email;
         this.password = password;
         this.roles = roles;
