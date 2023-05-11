@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Service;
 import java.util.List;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Service
 public class UsersService {
@@ -17,6 +18,9 @@ public class UsersService {
 
     @Autowired
     private EmailService emailService;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
 
     public List<Users> getAllUsers() {
         return usersRepository.findAll();
@@ -34,6 +38,8 @@ public class UsersService {
         }
         else
         {
+            userEntity.setRoles("ROLE_CUSTOMER");
+            userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword()));
             usersRepository.save(userEntity);
             Users user = usersRepository.findByEmailIgnoreCase(userEntity.getEmail());
             Cart cart = new Cart();
