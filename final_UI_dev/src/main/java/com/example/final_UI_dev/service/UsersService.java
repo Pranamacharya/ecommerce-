@@ -4,11 +4,24 @@ import com.example.final_UI_dev.entity.Cart;
 import com.example.final_UI_dev.entity.Users;
 import com.example.final_UI_dev.repository.CartRepository;
 import com.example.final_UI_dev.repository.UsersRepository;
+import jakarta.mail.MessagingException;
+import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
+
+import net.bytebuddy.utility.RandomString;
+import java.util.Date;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.mail.javamail.MimeMessageHelper;
+
+
+import java.io.UnsupportedEncodingException;
 import java.util.List;
+import java.util.Random;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Service
@@ -20,6 +33,9 @@ public class UsersService {
     private EmailService emailService;
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private JavaMailSender mailSender;
 
 
     public List<Users> getAllUsers() {
@@ -59,4 +75,82 @@ public class UsersService {
         return ResponseEntity.ok("Registration successful. Please check your email (" + userEntity.getEmail() + ") to confirm your account.");
 
     }
+
+
+
+
+    public void generateOneTimePassword(Users user)
+            throws UnsupportedEncodingException, MessagingException {
+       // String OTP = RandomString.make(8);
+        Random random = new Random();
+        int otpValue = random.nextInt(900000) + 100000; // Generates a random number between 100000 and 999999
+        String OTP = String.valueOf(otpValue);
+        String encodedOTP = passwordEncoder.encode(OTP);
+        clearOTP(user);
+        user.setOneTimePassword(encodedOTP);
+        user.setOtpRequestedTime(new Date());
+
+        usersRepository.save(user);
+
+        sendOTPEmail(user, OTP);
+    }
+
+    public void sendOTPEmail(Users customer, String OTP)
+            throws UnsupportedEncodingException, MessagingException {
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message);
+
+        helper.setFrom("contact@shopme.com", "Bazaar Support");
+        helper.setTo(customer.getEmail());
+
+        String subject = "Here's your One Time Password (OTP) - Expire in 5 minutes!";
+
+        String content = "<p>Hello " + customer.getName() + "</p>"
+                + "<p>For security reason, you're required to use the following "
+                + "One Time Password to reset your password:</p>"
+                + "<p><b>" + OTP + "</b></p>"
+                + "<br>"
+                + "<p>Note: this OTP is set to expire in 5 minutes.</p>";
+
+        helper.setSubject(subject);
+
+        helper.setText(content, true);
+
+        mailSender.send(message);
+    }
+
+    public void clearOTP(Users customer) {
+        customer.setOneTimePassword(null);
+        customer.setOtpRequestedTime(null);
+        usersRepository.save(customer);
+    }
+
+    public boolean verifyOTP(Users user, String enteredOTP) {
+        String storedOTP = user.getOneTimePassword();
+        System.out.println(enteredOTP);
+        System.out.println(storedOTP);
+        System.out.println(passwordEncoder.encode(enteredOTP));
+        System.out.println(passwordEncoder.encode(enteredOTP)==storedOTP);
+            return passwordEncoder.matches(enteredOTP, storedOTP);
+        }
+
+
+    public boolean resetPassword(Users user, String enteredOTP, String newPassword)
+            throws UnsupportedEncodingException, MessagingException {
+        if (verifyOTP(user, enteredOTP)) {
+            // OTP is correct, allow password reset
+
+            String encodedPassword = passwordEncoder.encode(newPassword);
+            user.setPassword(encodedPassword);
+            usersRepository.save(user);
+            return true;
+
+            // Send confirmation email or perform other necessary actions
+
+        } else {
+            // OTP is incorrect, handle the error (throw an exception, return a response, etc.)
+            return false;
+        }
+    }
+
 }

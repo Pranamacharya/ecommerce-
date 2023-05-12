@@ -3,8 +3,10 @@ package com.example.final_UI_dev.controller;
 import com.example.final_UI_dev.entity.LoginRequest;
 import com.example.final_UI_dev.entity.LoginResponse;
 import com.example.final_UI_dev.entity.Users;
+import com.example.final_UI_dev.repository.UsersRepository;
 import com.example.final_UI_dev.service.JwtService;
 import com.example.final_UI_dev.service.UsersService;
+import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +19,10 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.UnsupportedEncodingException;
 import java.util.List;
+import java.util.Optional;
+
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/users")
@@ -29,6 +34,11 @@ UsersController {
     private AuthenticationManager authenticationManager;
     @Autowired
     JwtService jwtService;
+
+    @Autowired
+    UsersRepository usersRepository;
+
+
 
     @GetMapping("/getAll")
     public ResponseEntity<?> getAll(){
@@ -78,6 +88,43 @@ UsersController {
             throw new BadCredentialsException("Invalid username or password", e);
         }
     }
+    @PostMapping("/reset-password")
+    public ResponseEntity<String> resetPassword(
+            @RequestParam("email") String email,
+            @RequestParam("otp") String otp,
+            @RequestParam("newPassword") String newPassword) {
+       Users user = usersRepository.findByEmailIgnoreCase(email);
+        if (user == null) {
+            // Handle user not found error
+        } else {
+            try {
+               if(usersService.resetPassword(user, otp, newPassword))
+                return ResponseEntity.ok("Password reset successful");
+                else
+                    return ResponseEntity.ok("failed");
+            } catch (UnsupportedEncodingException | MessagingException e) {
+                // Handle email sending or other errors
+            }
+        }
+
+        // Handle any other errors and return an appropriate response
+        return null;
+    }
+    @PostMapping("/send-otp")
+    public void otp(@RequestParam("email") String email){
+    Users user = usersRepository.findByEmailIgnoreCase(email);
+        if (user == null) {
+        // Handle user not found error
+    } else {
+        try {
+            usersService.generateOneTimePassword(user);
+        } catch (UnsupportedEncodingException | MessagingException e) {
+            // Handle email sending or other errors
+        }
+    }
+
+    // Handle any other errors and return an appropriate response
+}
 
 
     @PostMapping("/add")
