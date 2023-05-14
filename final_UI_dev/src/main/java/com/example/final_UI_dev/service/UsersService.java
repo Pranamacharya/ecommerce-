@@ -43,9 +43,9 @@ public class UsersService {
             userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword()));
             usersRepository.save(userEntity);
             Users user = usersRepository.findByEmailIgnoreCase(userEntity.getEmail());
-            Cart cart = new Cart();
+          /*  Cart cart = new Cart();
             cart.setUser(user);
-            cartRepository.save(cart);
+            cartRepository.save(cart);*/
 
             //  ConfirmationToken confirmationToken = new ConfirmationToken(userEntity);
             //  confirmationTokenRepository.save(confirmationToken);
