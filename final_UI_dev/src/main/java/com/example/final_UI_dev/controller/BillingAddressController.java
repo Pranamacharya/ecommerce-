@@ -48,4 +48,36 @@ public class BillingAddressController {
         billingAddressService.deleteById(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
+    @PatchMapping("/{id}")
+    public ResponseEntity<BillingAddress> updateById(@PathVariable int id, @RequestBody BillingAddress updatedAddress) {
+        BillingAddress address = billingAddressService.getById(id);
+        if (address == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        // update the fields of the existing address with the values from the updatedAddress object
+        if (updatedAddress.getFullName() != null) {
+            address.setFullName(updatedAddress.getFullName());
+        }
+        if (updatedAddress.getEmail() != null) {
+            address.setEmail(updatedAddress.getEmail());
+        }
+        if (updatedAddress.getAddressLine1() != null) {
+            address.setAddressLine1(updatedAddress.getAddressLine1());
+        }if (updatedAddress.getAddressLine2() != null) {
+            address.setAddressLine2(updatedAddress.getAddressLine2());
+        }
+        if (updatedAddress.getCountry() != null) {
+            address.setCountry(updatedAddress.getCountry());
+        }
+        if (updatedAddress.getCompany() != null) {
+            address.setCompany(updatedAddress.getCompany());
+        }if (updatedAddress.getPhone() != null) {
+            address.setPhone(updatedAddress.getPhone());
+        }if (updatedAddress.getZipCode()!= null) {
+            address.setZipCode(updatedAddress.getZipCode());
+        }
+        BillingAddress savedAddress = billingAddressService.save(id,address);
+        return new ResponseEntity<>(savedAddress, HttpStatus.OK);
+    }
+
 }

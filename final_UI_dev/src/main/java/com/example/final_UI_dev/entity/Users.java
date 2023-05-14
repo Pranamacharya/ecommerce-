@@ -13,7 +13,6 @@ public class Users {
     @Column(name = "name", nullable = false, length = 50)
     private String name;
 
-
     @Column(name = "email", nullable = false, length = 100, unique = true)
     private String email;
 
@@ -25,6 +24,10 @@ public class Users {
 
     @Column(name="authenticated",nullable = false,length= 20)
     private String authenticated;
+    public Users(Integer userId) {
+        this.id = userId;
+    }
+
 
     public int getId() {
         return id;

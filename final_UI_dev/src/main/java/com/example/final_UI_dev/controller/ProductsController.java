@@ -53,5 +53,14 @@ public class ProductsController {
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }*/
 
+    @GetMapping("/search")          //search bar
+    public List<Products> searchProductsByName(@RequestParam("name") String name) {
+        return productsService.searchProductsByName(name);
+    }
+    @GetMapping("/names")       // return list of product names for filtering in search bar
+    public ResponseEntity<List<String>> getAllProductNames() {
+        List<String> productNames = productsService.getAllProductNames();
+        return ResponseEntity.ok(productNames);
+    }
 }
 

@@ -5,6 +5,7 @@ import com.example.final_UI_dev.entity.ShippingAddress;
 import com.example.final_UI_dev.entity.Users;
 import com.example.final_UI_dev.repository.BillingAddressRepository;
 import com.example.final_UI_dev.repository.ShippingAddressRepository;
+import com.example.final_UI_dev.repository.UsersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +15,8 @@ import java.util.List;
 public class BillingAddressService {
     @Autowired
     private BillingAddressRepository billingAddressRepository;
+    @Autowired
+    private UsersRepository usersRepository;
     public BillingAddress updateByUser(int userId, BillingAddress newAddress) throws Exception {
         BillingAddress addressToUpdate = billingAddressRepository.findByUserId(userId);
         if (addressToUpdate == null) {
@@ -30,7 +33,8 @@ public class BillingAddressService {
         return billingAddressRepository.save(addressToUpdate);
     }
     public BillingAddress save(int userId, BillingAddress billingAddress) {
-        billingAddress.getUser().setId(userId);
+        Users users = usersRepository.findById(userId).orElse(null);
+        billingAddress.setUser(users);
         return billingAddressRepository.save(billingAddress);
     }
 
@@ -45,5 +49,9 @@ public class BillingAddressService {
 
     public void deleteById(int id) {
         billingAddressRepository.deleteById(id);
+    }
+
+    public BillingAddress getById(int id) {
+        return billingAddressRepository.findById(id).orElse(null);
     }
 }

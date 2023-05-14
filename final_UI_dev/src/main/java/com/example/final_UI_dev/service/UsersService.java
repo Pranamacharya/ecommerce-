@@ -5,6 +5,7 @@ import com.example.final_UI_dev.entity.Users;
 import com.example.final_UI_dev.repository.CartRepository;
 import com.example.final_UI_dev.repository.UsersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Service;
@@ -58,5 +59,21 @@ public class UsersService {
         }
         return ResponseEntity.ok("Registration successful. Please check your email (" + userEntity.getEmail() + ") to confirm your account.");
 
+    }
+
+
+    public ResponseEntity<?> updateName(int userId, String name) {
+        Users users = usersRepository.findById(userId).orElse(null);
+        if(users!=null){
+            users.setName(name);
+            usersRepository.save(users);
+            return new ResponseEntity<>("Name Updated", HttpStatus.OK);
+        }
+        return new ResponseEntity<>("User Not Found", HttpStatus.NOT_FOUND);
+    }
+
+    public ResponseEntity<?> getProfile(int userId) {
+        Users users=usersRepository.findById(userId).orElse(null);
+        return ResponseEntity.ok(users);
     }
 }

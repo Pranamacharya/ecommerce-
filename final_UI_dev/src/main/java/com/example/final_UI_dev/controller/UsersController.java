@@ -40,6 +40,7 @@ UsersController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
+
     /*
     @PostMapping("/login")
     public ResponseEntity<String> authenticateAndGetToken(@RequestBody LoginRequest request) {
@@ -58,7 +59,6 @@ UsersController {
             throw new BadCredentialsException("Invalid username or password", e);
         }
     }
-
      */
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> authenticateAndGetToken(@RequestBody LoginRequest request) {
@@ -70,7 +70,6 @@ UsersController {
                 System.out.println(token);
                 LoginResponse response = new LoginResponse(token);
                 return ResponseEntity.ok(response);
-
             } else {
                 throw new UsernameNotFoundException("Invalid user request!");
             }
@@ -85,6 +84,13 @@ UsersController {
             return usersService.saveNewUser(users);
 }
 
+    @PatchMapping("/updateName/{userId}")
+    public ResponseEntity<?> updateProfile(@PathVariable int userId,@RequestParam String name){
+        return usersService.updateName(userId,name);
+    }
 
-
+    @GetMapping("/{userId}")
+    public ResponseEntity<?> profileUser(@PathVariable int userId){
+        return usersService.getProfile(userId);
+    }
 }
