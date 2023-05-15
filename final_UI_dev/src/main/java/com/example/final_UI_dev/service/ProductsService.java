@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ProductsService {
@@ -44,5 +45,18 @@ public class ProductsService {
         }
         return null;
     }*/
+
+    public List<Products> searchProductsByName(String name) {
+        List<Products> products = productsRepository.findByNameContainingIgnoreCase(name);
+        if (name != null && !name.isEmpty()) {
+            products = products.stream()
+                    .filter(p -> p.getName().toLowerCase().contains(name.toLowerCase()))
+                    .collect(Collectors.toList());
+        }
+        return products;
+    }
+    public List<String> getAllProductNames() {
+        return productsRepository.findAllProductNames();
+    }
 
 }
