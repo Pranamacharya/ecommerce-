@@ -2,9 +2,13 @@ package com.example.final_UI_dev.entity;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
+import java.util.Date;
+
 @Entity
 @Table(name = "users")
 public class Users {
+    private static final long OTP_VALID_DURATION = 5 * 60 * 1000;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -12,6 +16,7 @@ public class Users {
 
     @Column(name = "name", nullable = false, length = 50)
     private String name;
+
 
     @Column(name = "email", nullable = false, length = 100, unique = true)
     private String email;
@@ -22,12 +27,44 @@ public class Users {
     @Column(name = "roles", nullable = false, length = 20)
     private String roles;
 
-    @Column(name="authenticated",nullable = false,length= 20)
-    private String authenticated;
-    public Users(Integer userId) {
-        this.id = userId;
+    public String getOneTimePassword() {
+        return oneTimePassword;
     }
 
+    public void setOneTimePassword(String oneTimePassword) {
+        this.oneTimePassword = oneTimePassword;
+    }
+
+    public Date getOtpRequestedTime() {
+        return otpRequestedTime;
+    }
+
+    public void setOtpRequestedTime(Date otpRequestedTime) {
+        this.otpRequestedTime = otpRequestedTime;
+    }
+
+    @Column(name = "one_time_password")
+    private String oneTimePassword;
+
+    @Column(name = "otp_requested_time")
+    private Date otpRequestedTime;
+
+
+    public boolean isOTPRequired() {
+        if (this.getOneTimePassword() == null) {
+            return false;
+        }
+
+        long currentTimeInMillis = System.currentTimeMillis();
+        long otpRequestedTimeInMillis = this.otpRequestedTime.getTime();
+
+        if (otpRequestedTimeInMillis + OTP_VALID_DURATION < currentTimeInMillis) {
+            // OTP expires
+            return false;
+        }
+
+        return true;
+    }
 
     public int getId() {
         return id;
@@ -81,13 +118,6 @@ public class Users {
     public Users() {
     }
 
-    public String getAuthenticated() {
-        return authenticated;
-    }
-
-    public void setAuthenticated(String authenticated) {
-        this.authenticated = authenticated;
-    }
 
 
 }
