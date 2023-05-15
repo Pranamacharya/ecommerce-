@@ -4,8 +4,8 @@ import com.example.final_UI_dev.entity.Products;
 import com.example.final_UI_dev.repository.ProductsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import java.util.List;
-import java.util.Optional;
+
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -30,22 +30,6 @@ public class ProductsService {
         productsRepository.deleteById(productId);
     }
 
-/*    public Products updateProduct(int productId, Products updatedProduct) {
-        Optional<Products> existingProduct = productsRepository.findById(productId);
-        if (existingProduct.isPresent()) {
-            Products product = existingProduct.get();
-            product.setName(updatedProduct.getName());
-            product.setDescription(updatedProduct.getDescription());
-            product.setPrice(updatedProduct.getPrice());
-            product.setCategory(updatedProduct.getCategory());
-            product.setImageUrl(updatedProduct.getImageUrl());
-            product.setStock(updatedProduct.getStock());
-
-            return productsRepository.save(product);
-        }
-        return null;
-    }*/
-
     public List<Products> searchProductsByName(String name) {
         List<Products> products = productsRepository.findByNameContainingIgnoreCase(name);
         if (name != null && !name.isEmpty()) {
@@ -59,4 +43,15 @@ public class ProductsService {
         return productsRepository.findAllProductNames();
     }
 
+    public List<Products> getAllProductsByCategories(int categoriesId) {
+        List<Products> productsList= productsRepository.findAll();
+        List<Products> productsList1 = new ArrayList<>();
+        for(Products products: productsList){
+            if(products.getCategory().getCategoryId().equals(categoriesId)){
+                productsList1.add(products);
+            }
+
+        }
+        return productsList1;
+    }
 }

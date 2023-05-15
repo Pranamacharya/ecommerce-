@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/reviews")
@@ -20,14 +21,14 @@ public class ReviewController {
     }
 
     @GetMapping("/product/{productId}")
-    public List<Review> getReviewsByProductId(@PathVariable Integer productId) {
+    public List<Map<String, Object>> getReviewsByProductId(@PathVariable Integer productId) {
         return reviewService.getReviewsByProductId(productId);
     }
-
-    @PostMapping
-    public Review createReview(@RequestBody Review review) {
-        return reviewService.save(review);
+    @PostMapping("/{userId}/{productId}")
+    public Review createReview(@PathVariable int userId, @PathVariable int productId,@RequestBody Review review) {
+        return reviewService.save(userId,productId,review);
     }
+
 
     @DeleteMapping("/{reviewId}")
     public void deleteReview(@PathVariable Integer reviewId) {

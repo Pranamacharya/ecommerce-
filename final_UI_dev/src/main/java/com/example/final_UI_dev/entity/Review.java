@@ -5,7 +5,9 @@ import jakarta.persistence.*;
 import java.util.Date;
 
 @Entity
-@Table(name = "Review")
+@Table(name = "Review", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "user_id", "product_id" })
+})
 public class Review {
 
     @Id
@@ -42,9 +44,7 @@ public class Review {
         this.reviewDate = reviewDate;
     }
 
-    public Review(Users user, Products product, Integer rating, String comment) {
-        this.user = user;
-        this.product = product;
+    public Review(Integer rating, String comment) {
         this.rating = rating;
         this.comment = comment;
     }
