@@ -66,9 +66,6 @@ public class Users {
         return true;
     }
 
-    @Column(name="authenticated",nullable = false,length= 20)
-    private String authenticated;
-
     public int getId() {
         return id;
     }
@@ -121,13 +118,6 @@ public class Users {
     public Users() {
     }
 
-    public String getAuthenticated() {
-        return authenticated;
-    }
-
-    public void setAuthenticated(String authenticated) {
-        this.authenticated = authenticated;
-    }
 
 
 }

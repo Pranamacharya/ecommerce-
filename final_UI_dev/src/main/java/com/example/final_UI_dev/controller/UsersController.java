@@ -129,9 +129,20 @@ UsersController {
 
     @PostMapping("/add")
     public ResponseEntity<?> addUser(@RequestBody Users users){
-            return usersService.saveNewUser(users);
+        usersService.saveNewUser(users);
+      // return ResponseEntity.ok("Signup successfull");
+        return ResponseEntity.ok().body("{\"message\": \"Signup successful\"}");
+    }
+
+@PostMapping("/change")
+    public ResponseEntity<?> changepassword(
+        @RequestParam("email") String email,
+        @RequestParam("old") String old,
+        @RequestParam("nw") String nw) throws MessagingException, UnsupportedEncodingException {
+       if(usersService.changePassword(email,old,nw))
+          return  ResponseEntity.ok("Password changed successfully");
+       else
+          return ResponseEntity.ok("Either email or password is incorrect");
+}
 }
 
-
-
-}
