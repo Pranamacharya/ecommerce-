@@ -2,7 +2,9 @@ package com.example.final_UI_dev.controller;
 
 import com.example.final_UI_dev.entity.LoginRequest;
 import com.example.final_UI_dev.entity.LoginResponse;
+import com.example.final_UI_dev.entity.Tokens;
 import com.example.final_UI_dev.entity.Users;
+import com.example.final_UI_dev.repository.TokenRepository;
 import com.example.final_UI_dev.repository.UsersRepository;
 import com.example.final_UI_dev.service.JwtService;
 import com.example.final_UI_dev.service.UsersService;
@@ -16,10 +18,12 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,6 +41,9 @@ UsersController {
 
     @Autowired
     UsersRepository usersRepository;
+
+    @Autowired
+    TokenRepository tokenRepository;
 
 
 
@@ -77,6 +84,11 @@ UsersController {
             Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getFirstname(), request.getPassword()));
             if (authentication.isAuthenticated()) {
                 String token = jwtService.generateToken(request.getFirstname());
+                Optional<Users> use=usersRepository.findByEmail(request.getFirstname());
+                Tokens tok=tokenRepository.getTokenByUser(use.get());
+                tok.setToken(token);
+                tok.setCreation(new Date());
+                tokenRepository.save(tok);
                 System.out.println(token);
                 LoginResponse response = new LoginResponse(token);
                 return ResponseEntity.ok(response);

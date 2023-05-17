@@ -1,8 +1,10 @@
 package com.example.final_UI_dev.service;
 
 import com.example.final_UI_dev.entity.Cart;
+import com.example.final_UI_dev.entity.Tokens;
 import com.example.final_UI_dev.entity.Users;
 import com.example.final_UI_dev.repository.CartRepository;
+import com.example.final_UI_dev.repository.TokenRepository;
 import com.example.final_UI_dev.repository.UsersRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
@@ -39,6 +41,8 @@ public class UsersService {
     @Autowired
     private JavaMailSender mailSender;
 
+    @Autowired
+    private TokenRepository tokenRepository;
 
     public List<Users> getAllUsers() {
         return usersRepository.findAll();
@@ -61,8 +65,12 @@ public class UsersService {
             Cart cart = new Cart();
             cart.setUser(user);
             cartRepository.save(cart);
+            Tokens tokens=new Tokens();
+            tokens.setUser(user);
+            tokenRepository.save(tokens);
 
-            //  ConfirmationToken confirmationToken = new ConfirmationToken(userEntity);
+
+            //  ConfirmationToken = new ConfirmationToken(userEntity);
             //  confirmationTokenRepository.save(confirmationToken);
 
             SimpleMailMessage mailMessage = new SimpleMailMessage();
@@ -103,7 +111,7 @@ public class UsersService {
 
         String subject = "Here's your One Time Password (OTP) - Expire in 5 minutes!";
 
-        String content = "<p>Hello " + customer.getName() + "</p>"
+        String content = "<p>Hello " + customer.getEmail() + "</p>"
                 + "<p>For security reason, you're required to use the following "
                 + "One Time Password to reset your password:</p>"
                 + "<p><b>" + OTP + "</b></p>"
