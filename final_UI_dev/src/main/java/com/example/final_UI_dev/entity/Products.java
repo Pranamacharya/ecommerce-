@@ -2,6 +2,8 @@ package com.example.final_UI_dev.entity;
 
 import jakarta.persistence.*;
 
+import java.util.List;
+
 @Entity
 @Table(name = "Products")
 public class Products {
@@ -33,7 +35,19 @@ public class Products {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "brand_id", referencedColumnName = "brand_id")
     private Brand brand;
-
+    /*@OneToMany(mappedBy = "product", fetch = FetchType.EAGER)
+    private List<Review> reviews;*/
+    /*public Products(int productId, String name, String description, long price, String imageUrl, int stock, Category category, Brand brand, List<Review> reviews) {
+        this.productId = productId;
+        this.name = name;
+        this.description = description;
+        this.price = price;
+        this.imageUrl = imageUrl;
+        this.stock = stock;
+        this.category = category;
+        this.brand = brand;
+        this.reviews = reviews;
+    }*/
     public Products(int productId, String name, String description, long price, String imageUrl, int stock, Category category, Brand brand) {
         this.productId = productId;
         this.name = name;
@@ -111,5 +125,14 @@ public class Products {
     public void setBrand(Brand brand) {
         this.brand = brand;
     }
+
+  /*  public List<Review> getReviews() {
+        return reviews;
+    }
+
+    public void setReviews(List<Review> reviews) {
+        this.reviews = reviews;
+    }*/
+
 }
 

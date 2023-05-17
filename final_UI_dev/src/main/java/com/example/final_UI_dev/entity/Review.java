@@ -3,6 +3,7 @@ package com.example.final_UI_dev.entity;
 import jakarta.persistence.*;
 
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "Review", uniqueConstraints = {
@@ -31,6 +32,7 @@ public class Review {
 
     @Column(name = "review_date")
     private Date reviewDate;
+
 
     public Review() {
     }
