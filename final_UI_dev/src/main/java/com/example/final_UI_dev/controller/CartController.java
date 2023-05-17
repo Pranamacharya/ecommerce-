@@ -37,20 +37,26 @@ public class CartController {
         List<Map<String, Object>> cart = cartService.getCartByUserId(userId);
         return ResponseEntity.ok(cart);
     }
-
-
+    @GetMapping("/{userId}/{productId}")
+    public ResponseEntity<?> getCartByUserId(@PathVariable int userId,@PathVariable int productId ) {
+        List<Map<String, Object>> cart = cartService.getCartByUserIdAndProductId(userId, productId);
+        return ResponseEntity.ok(cart);
+    }
     @PostMapping("/{userId}/{productId}/{quantity}")
-    public ResponseEntity<Void> addProductToCart( @PathVariable int userId, @PathVariable int productId,@PathVariable int quantity) {
-        cartService.addProductToCart(userId, productId,quantity);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<?> addProductToCart( @PathVariable int userId, @PathVariable int productId,@PathVariable int quantity) {
+        try {
+            cartService.addProductToCart(userId, productId, quantity);
+            return ResponseEntity.ok().build();
+        }catch(Exception e){
+            e.printStackTrace();
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
-@DeleteMapping("/{userId}/{productId}")
+    @DeleteMapping("/{userId}/{productId}")
     public ResponseEntity<Void> deleteProductFromCart(@PathVariable int userId, @PathVariable int productId) {
-
     cartService.deleteProduct(userId,productId);
     return new ResponseEntity<>(HttpStatus.OK);
-
     }
 
 
