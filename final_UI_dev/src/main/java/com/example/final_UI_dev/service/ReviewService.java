@@ -88,7 +88,7 @@ public class ReviewService {
                 }
 
                 reviewMap.put("reviewDate", formattedDate);
-                reviewMap.put("userName", r.getUser().getName());
+                reviewMap.put("userName", r.getUser().getEmail());
                 reviewMap.put("rating", r.getRating());
                 reviewMap.put("comment", r.getComment());
                 filteredReviews.add(reviewMap);
