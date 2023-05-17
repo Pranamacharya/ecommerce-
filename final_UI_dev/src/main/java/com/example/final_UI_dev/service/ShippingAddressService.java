@@ -29,7 +29,10 @@ public class ShippingAddressService {
         addressToUpdate.setCountry(newAddress.getCountry());
         return shippingAddressRepository.save(addressToUpdate);
     }
+    @Autowired
+    private UsersRepository usersRepository;
     public ShippingAddress save(int userId, ShippingAddress shippingAddress) {
+        shippingAddress.setUser(usersRepository.findById(userId).orElse(null));
         shippingAddress.getUser().setId(userId);
         return shippingAddressRepository.save(shippingAddress);
     }

@@ -55,6 +55,7 @@ public class  CartService {
         }
         return individualCart;
     }*/
+
     public List<Map<String, Object>> getCartByUserId(int userId) {
         Users users = usersRepository.findById(userId).orElse(null);
         List<Cart> cartList = cartRepository.findByUser(users);
@@ -89,7 +90,7 @@ public class  CartService {
         return new ArrayList<>(cartDetailsMap.values());
     }
 
-    public Cart addProductToCart(int userId, int productId, int quantity) {
+    /*public Cart addProductToCart(int userId, int productId, int quantity) {
         Products product = productService.getProductById(productId).orElse(null);
         if (product == null) {
             throw new RuntimeException("Product not found");
@@ -104,11 +105,38 @@ public class  CartService {
         cart.setTotalPrice(totalPrice);
 
         return cartRepository.save(cart);
+    }*/
+
+    public String addProductToCart(int userId, int productId, int quantity) {
+        Products product = productService.getProductById(productId).orElse(null);
+        if (product == null) {
+            throw new RuntimeException("Product not found");
+        }
+
+        if (quantity > product.getStock()) {
+            throw new RuntimeException("Insufficient stock");
+        }
+
+        Cart cart = new Cart();
+        cart.setUser(usersRepository.findById(userId).orElse(null));
+        cart.setProduct(product);
+        cart.setQuantity(quantity);
+        cart.setPrice(product.getPrice());
+        Long totalPrice = product.getPrice() * quantity;  //total price
+        cart.setTotalPrice(totalPrice);
+
+        // Deduct the ordered quantity from the stock
+        int remainingStock = product.getStock() - quantity;
+        product.setStock(remainingStock);
+        productsRepository.save(product);
+        cartRepository.save(cart);
+        return "Product added to cart";
+        //return ;
     }
 
 
 
-    public void deleteProduct(int userId, int productId) {
+    /*public void deleteProduct(int userId, int productId) {
         Users users = usersRepository.findById(userId).orElse(null);
         List<Cart> cartList = cartRepository.findByUser(users);
         for (Cart cart : cartList) {
@@ -116,9 +144,65 @@ public class  CartService {
                 cartRepository.delete(cart);
             }
         }
+    }*/
+    public void deleteProduct(int userId, int productId) {
+        Users user = usersRepository.findById(userId).orElse(null);
+        List<Cart> cartList = cartRepository.findByUser(user);
+
+        for (Cart cart : cartList) {
+            if (cart.getProduct().getProductId() == productId) {
+                int refundedQuantity = cart.getQuantity();
+
+                // Retrieve the product
+                Products product = cart.getProduct();
+
+                // Increase the stock by refunded quantity
+                int updatedStock = product.getStock() + refundedQuantity;
+                product.setStock(updatedStock);
+
+                // Update the product in the database
+                productsRepository.save(product);
+
+                // Delete the cart entry
+                cartRepository.delete(cart);
+            }
+        }
     }
 
 
+    public List<Map<String, Object>> getCartByUserIdAndProductId(int userId, int productId) {
+        Users users = usersRepository.findById(userId).orElse(null);
+        List<Cart> cartList = cartRepository.findByUser(users);
+        Map<String, Map<String, Object>> cartDetailsMap = new HashMap<>();
+        for (Cart cart : cartList) {
+            if (cart.getProduct().getProductId()==productId) {
+                String productName = cart.getProduct().getName();
+                if (!cartDetailsMap.containsKey(productName)) {
+                    Map<String, Object> cartDetails = new HashMap<>();
+                    cartDetails.put("name", productName);
+                    cartDetails.put("id",cart.getProduct().getProductId());
+                    cartDetails.put("image", cart.getProduct().getImageUrl());
+                    cartDetails.put("price", cart.getProduct().getPrice());
+                    cartDetails.put("quantity", cart.getQuantity());
+                    cartDetails.put("totalPrice", cart.getTotalPrice());
+                    cartDetails.put("maxQuantity", cart.getProduct().getStock());
+                    cartDetailsMap.put(productName, cartDetails);
+                } else {
+                    Map<String, Object> cartDetails = cartDetailsMap.get(productName);
+                    cartDetails.put("id",cart.getProduct().getProductId());
+                    int currentQuantity = (int) cartDetails.get("quantity");
+                    int currentMaxQuantity = (int) cartDetails.get("maxQuantity");
+                    int newQuantity = currentQuantity + cart.getQuantity();
+                    int newMaxQuantity = Math.max(currentMaxQuantity, cart.getProduct().getStock());
+                    Long newTotalPrice = (Long) cartDetails.get("totalPrice") + cart.getTotalPrice();
+                    cartDetails.put("quantity", newQuantity);
+                    cartDetails.put("maxQuantity", newMaxQuantity);
+                    cartDetails.put("totalPrice", newTotalPrice);
+                }
+            }
+        }
+        return new ArrayList<>(cartDetailsMap.values());
+    }
 }
 
 
