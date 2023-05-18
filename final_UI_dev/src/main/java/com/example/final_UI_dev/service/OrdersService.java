@@ -4,9 +4,9 @@ import com.example.final_UI_dev.entity.*;
 import com.example.final_UI_dev.repository.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -51,16 +51,12 @@ public class OrdersService {
         cartRepository.deleteAllByUser(usersRepository.findById(userId).orElse(null));
     }
 
-  /*  public List<Orders> getOrdersByUser(int userId) {
-        Users user = new Users();
-        user.setId(userId);
-        return ordersRepository.findByUser(user);
-    }*/
 
-  public List<Map<String, Object>> getOrdersByUser(int userId) {
+
+  public List<Map<String, Object>> getOrdersByUser(int userId, Pageable pageable) {
       Users user = new Users();
       user.setId(userId);
-      List<Orders> ordersList = ordersRepository.findByUser(user);
+      List<Orders> ordersList = ordersRepository.findByUser(user, pageable);
       List<Map<String, Object>> filteredOrders = new ArrayList<>();
       for (Orders order : ordersList) {
           Map<String, Object> filteredOrder = new HashMap<>();
@@ -72,6 +68,11 @@ public class OrdersService {
       }
       return filteredOrders;
   }
+/*public List<Orders> getOrdersByUser(int userId, Pageable pageable) {
+    Users user = new Users();
+    user.setId(userId);
+    return ordersRepository.findByUser(user, pageable);
+}*/
 
 
 
@@ -91,4 +92,7 @@ public class OrdersService {
         return ordersRepository.save(order);
     }
 
+    public List<Orders> getAllOrder() {
+      return ordersRepository.findAll();
+    }
 }

@@ -3,6 +3,9 @@ package com.example.final_UI_dev.controller;
 import com.example.final_UI_dev.entity.Orders;
 import com.example.final_UI_dev.service.OrdersService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,10 +29,24 @@ public class OrdersController {
         }
     }
 
-    @GetMapping("/{userId}")
+    /*@GetMapping("/{userId}")
     public ResponseEntity<?> getOrdersByUser(@PathVariable int userId) {
         List<Map<String, Object>> orders = ordersService.getOrdersByUser(userId);
         return ResponseEntity.ok(orders);
+    }*/
+    @GetMapping("/{userId}")
+    public ResponseEntity<?> getOrdersByUser(
+            @PathVariable int userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        // Create a Pageable object for pagination
+        Pageable pageable = PageRequest.of(page, size);
+
+        // Fetch the orders using the service method
+        List<Map<String, Object>> ordersPage = ordersService.getOrdersByUser(userId, pageable);
+
+        return ResponseEntity.ok(ordersPage);
     }
 
     @GetMapping("/product/{productId}")
@@ -49,4 +66,11 @@ public class OrdersController {
         Orders newOrder = ordersService.addOrder(order);
         return ResponseEntity.ok(newOrder);
     }
+
+    @GetMapping("")
+    public ResponseEntity<?> AllOrders() {
+        List<Orders> newOrder = ordersService.getAllOrder();
+        return ResponseEntity.ok(newOrder);
+    }
+
 }

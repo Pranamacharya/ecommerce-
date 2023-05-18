@@ -62,9 +62,9 @@ public class UsersService {
             userEntity.setPassword(passwordEncoder.encode(userEntity.getPassword()));
             usersRepository.save(userEntity);
             Users user = usersRepository.findByEmailIgnoreCase(userEntity.getEmail());
-            Cart cart = new Cart();
+         /*   Cart cart = new Cart();
             cart.setUser(user);
-            cartRepository.save(cart);
+            cartRepository.save(cart);*/
             Tokens tokens=new Tokens();
             tokens.setUser(user);
             tokenRepository.save(tokens);
