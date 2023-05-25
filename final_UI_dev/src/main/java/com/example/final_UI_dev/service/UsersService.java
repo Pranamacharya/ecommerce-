@@ -27,6 +27,7 @@ import java.util.Optional;
 import java.util.Random;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.webjars.NotFoundException;
 
 @Service
 public class UsersService {
@@ -48,9 +49,16 @@ public class UsersService {
         return usersRepository.findAll();
     }
 
-
     @Autowired
     private CartRepository cartRepository;
+
+    public Users updateUserEmail(int userId, String newEmail) {
+        Users user = usersRepository.findById(userId)
+                .orElseThrow(() -> new NotFoundException("User not found with ID: " + userId));
+
+        user.setEmail(newEmail);
+        return usersRepository.save(user);
+    }
 
     public ResponseEntity<?> saveNewUser(Users userEntity) {
         Users existingUser = usersRepository.findByEmailIgnoreCase(userEntity.getEmail());

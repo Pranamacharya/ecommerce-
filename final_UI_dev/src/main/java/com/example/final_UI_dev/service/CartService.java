@@ -9,11 +9,7 @@ import com.example.final_UI_dev.repository.UsersRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 @Service
@@ -33,28 +29,6 @@ public class  CartService {
     public List<Cart> getAllCarts() {
         return cartRepository.findAll();
     }
-
-
-    /*public List<Map<String, Object>> getCartByUserId(int userId) {
-        Users users = usersRepository.findById(userId).orElse(null);
-        List<Cart> cartList = cartRepository.findByUser(users);
-        List<Map<String, Object>> individualCart = new ArrayList<>();
-        for (Cart cart : cartList) {
-            if(cart.getProduct()!=null) {
-                Map<String, Object> cartDetails = new HashMap<>();
-                cartDetails.put("name", cart.getProduct().getName());
-                cartDetails.put("Image",cart.getProduct().getImageUrl());
-                cartDetails.put("price", cart.getProduct().getPrice());
-                cartDetails.put("quantity", cart.getQuantity());
-                cartDetails.put("totalPrice", cart.getTotalPrice());
-                cartDetails.put("MaxQuantity",cart.getProduct().getStock());
-
-
-                individualCart.add(cartDetails);
-            }
-        }
-        return individualCart;
-    }*/
 
     public List<Map<String, Object>> getCartByUserId(int userId) {
         Users users = usersRepository.findById(userId).orElse(null);
@@ -90,22 +64,7 @@ public class  CartService {
         return new ArrayList<>(cartDetailsMap.values());
     }
 
-    /*public Cart addProductToCart(int userId, int productId, int quantity) {
-        Products product = productService.getProductById(productId).orElse(null);
-        if (product == null) {
-            throw new RuntimeException("Product not found");
-        }
 
-        Cart cart = new Cart();
-        cart.setUser(usersRepository.findById(userId).orElse(null));
-        cart.setProduct(product);
-        cart.setQuantity(quantity);
-        cart.setPrice(product.getPrice());
-        Long totalPrice = product.getPrice() * quantity;  //total price
-        cart.setTotalPrice(totalPrice);
-
-        return cartRepository.save(cart);
-    }*/
 
     public String addProductToCart(int userId, int productId, int quantity) {
         Products product = productService.getProductById(productId).orElse(null);
@@ -134,17 +93,6 @@ public class  CartService {
         //return ;
     }
 
-
-
-    /*public void deleteProduct(int userId, int productId) {
-        Users users = usersRepository.findById(userId).orElse(null);
-        List<Cart> cartList = cartRepository.findByUser(users);
-        for (Cart cart : cartList) {
-            if (cart.getProduct() != null && cart.getProduct().getProductId() == productId) {
-                cartRepository.delete(cart);
-            }
-        }
-    }*/
     public void deleteProduct(int userId, int productId) {
         Users user = usersRepository.findById(userId).orElse(null);
         List<Cart> cartList = cartRepository.findByUser(user);
@@ -165,6 +113,40 @@ public class  CartService {
 
                 // Delete the cart entry
                 cartRepository.delete(cart);
+            }
+        }
+    }
+    public void deleteProductByQuantity(int userId, int productId, int quantity) {
+        Users user = usersRepository.findById(userId).orElse(null);
+        List<Cart> cartList = cartRepository.findByUser(user);
+
+        for (Cart cart : cartList) {
+            if (cart.getProduct().getProductId() == productId) {
+                if (cart.getQuantity() <= quantity) {
+                    // Retrieve the product
+                    Products product = cart.getProduct();
+
+                    // Increase the stock by the refunded quantity
+                    int updatedStock = product.getStock() + cart.getQuantity();
+                    product.setStock(updatedStock);
+
+                    // Update the product in the database
+                    productsRepository.save(product);
+
+                    // Delete the cart entry
+                    cartRepository.delete(cart);
+                } else {
+                    // Decrease the cart item quantity by the specified quantity
+                    cart.setQuantity(cart.getQuantity() - quantity);
+                    cartRepository.save(cart);
+
+                    // Increase the stock by the refunded quantity
+                    Products product = cart.getProduct();
+                    int updatedStock = product.getStock() + quantity;
+                    product.setStock(updatedStock);
+                    productsRepository.save(product);
+                }
+                break; // Exit the loop after processing the matching cart item
             }
         }
     }
@@ -203,7 +185,7 @@ public class  CartService {
         }
         return new ArrayList<>(cartDetailsMap.values());
     }
-    public long calculateTotalCartPrice(int userId) {
+    public Map<String,Object> calculateTotalCartPrice(int userId) {
         Users users = usersRepository.findById(userId).orElse(null);
         List<Cart> cartList = cartRepository.findByUser(users);
         long totalCartPrice = 0;
@@ -212,11 +194,29 @@ public class  CartService {
             totalCartPrice += cart.getTotalPrice();
         }
 
-        return totalCartPrice;
+        long tax = 40;
+        long grandTotal = tax + totalCartPrice;
+
+        if(totalCartPrice ==0){
+            grandTotal=0;
+            tax = 0;
+        }
+        Map<String,Object> totalCart = new LinkedHashMap<>();
+        totalCart.put("Sub-Total",totalCartPrice);
+        totalCart.put("Shipping","-");
+        totalCart.put("tax",tax);
+        totalCart.put("Discount","-");
+        totalCart.put("Total Amount", grandTotal);
+
+        return totalCart;
+
     }
 
     public void clearCart(int userId) {
     }
+
+
+
 }
 
 

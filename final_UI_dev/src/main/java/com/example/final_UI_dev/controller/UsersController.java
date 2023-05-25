@@ -12,13 +12,11 @@ import jakarta.mail.MessagingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,7 +44,11 @@ UsersController {
     TokenRepository tokenRepository;
 
 
-
+    @PatchMapping("/{userId}")
+    public ResponseEntity<Users> updateUserEmail(@PathVariable int userId, @RequestParam String newEmail) {
+        Users updatedUser = usersService.updateUserEmail(userId, newEmail);
+        return ResponseEntity.ok(updatedUser);
+    }
     @GetMapping("/getAll")
     public ResponseEntity<?> getAll(){
         try {

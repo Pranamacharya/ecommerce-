@@ -34,6 +34,7 @@ public class ProductsController {
         List<Products> products = productsService.getAllProductsByCategories(categoriesId);
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
+
 /*    @GetMapping("/{productId}")
     public ResponseEntity<Products> getProductById(@PathVariable("productId") int productId) {
         Optional<Products> product = productsService.getProductById(productId);
@@ -42,6 +43,7 @@ public class ProductsController {
         }
         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }*/
+
 @Autowired
 private ProductsRepository productsRepository;
 
@@ -95,6 +97,7 @@ private ReviewService reviewService;
                 filteredReviews.add(filteredReview);
             }
             response.put("reviews", filteredReviews);
+            response.put("Number of reviews", filteredReviews.size()); // to get number of reviews
             //response.put("reviews",reviews);
 
             return ResponseEntity.ok(response);

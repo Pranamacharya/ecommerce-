@@ -32,16 +32,19 @@ public class CartController {
         List<Cart> carts = cartService.getAllCarts();
         return new ResponseEntity<>(carts, HttpStatus.OK);
     }
+
     @GetMapping("/{userId}")
     public ResponseEntity<?> getCartByUserId(@PathVariable int userId) {
         List<Map<String, Object>> cart = cartService.getCartByUserId(userId);
         return ResponseEntity.ok(cart);
     }
+
     @GetMapping("/{userId}/{productId}")
     public ResponseEntity<?> getCartByUserId(@PathVariable int userId,@PathVariable int productId ) {
         List<Map<String, Object>> cart = cartService.getCartByUserIdAndProductId(userId, productId);
         return ResponseEntity.ok(cart);
     }
+
     @PostMapping("/{userId}/{productId}/{quantity}")
     public ResponseEntity<?> addProductToCart( @PathVariable int userId, @PathVariable int productId,@PathVariable int quantity) {
         try {
@@ -58,15 +61,30 @@ public class CartController {
     cartService.deleteProduct(userId,productId);
     return new ResponseEntity<>(HttpStatus.OK);
     }
+
     @GetMapping("/totalPrice/{userId}")
-    public ResponseEntity<Long> getTotalCartPrice(@PathVariable int userId) {
-        long totalCartPrice = cartService.calculateTotalCartPrice(userId);
+    public ResponseEntity<?> getTotalCartPrice(@PathVariable int userId) {
+        Map<String,Object> totalCartPrice = cartService.calculateTotalCartPrice(userId);
         return ResponseEntity.ok(totalCartPrice);
     }
+
     @DeleteMapping("/{userId}")
     public ResponseEntity<Void> clearCart( @PathVariable int userId) {
         cartService.clearCart(userId);
         return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/delete/{userId}/{productId}/{quantity}")
+    public ResponseEntity<String> deleteProduct(
+            @PathVariable int userId,
+            @PathVariable int productId,
+            @PathVariable int quantity) {
+        try {
+            cartService.deleteProductByQuantity(userId, productId, quantity);
+            return ResponseEntity.ok("Product deleted successfully");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
 }

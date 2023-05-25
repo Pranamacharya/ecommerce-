@@ -29,11 +29,11 @@ public class OrdersController {
         }
     }
 
-    /*@GetMapping("/{userId}")
-    public ResponseEntity<?> getOrdersByUser(@PathVariable int userId) {
-        List<Map<String, Object>> orders = ordersService.getOrdersByUser(userId);
+    @GetMapping("/getByOrder/{orderId}")
+    public ResponseEntity<?> getOrdersByOrderId(@PathVariable int orderId) {
+        List<Map<String, Object>> orders = ordersService.getOrdersByOrderIds(orderId);
         return ResponseEntity.ok(orders);
-    }*/
+    }
     @GetMapping("/{userId}")
     public ResponseEntity<?> getOrdersByUser(
             @PathVariable int userId,
@@ -47,6 +47,15 @@ public class OrdersController {
         List<Map<String, Object>> ordersPage = ordersService.getOrdersByUser(userId, pageable);
 
         return ResponseEntity.ok(ordersPage);
+    }
+    @GetMapping("")
+    public ResponseEntity<?> AllOrders(@RequestParam(defaultValue = "0") int page,
+                                       @RequestParam(defaultValue = "10") int size) {
+        // Create a Pageable object for pagination
+        Pageable pageable = PageRequest.of(page, size);
+
+        List<Map<String, Object>> newOrder = ordersService.getAllOrder(pageable);
+        return ResponseEntity.ok(newOrder);
     }
 
     @GetMapping("/product/{productId}")
@@ -67,10 +76,6 @@ public class OrdersController {
         return ResponseEntity.ok(newOrder);
     }
 
-    @GetMapping("")
-    public ResponseEntity<?> AllOrders() {
-        List<Orders> newOrder = ordersService.getAllOrder();
-        return ResponseEntity.ok(newOrder);
-    }
+
 
 }

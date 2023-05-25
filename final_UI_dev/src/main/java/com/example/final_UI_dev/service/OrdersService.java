@@ -4,6 +4,7 @@ import com.example.final_UI_dev.entity.*;
 import com.example.final_UI_dev.repository.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +26,8 @@ public class OrdersService {
     private ProductsRepository productsRepository;
     @Autowired
     private ShippingAddressRepository shippingAddressRepository;
+
+
     @Transactional
     public void placeOrder(int userId) {
         // Get all items in the cart for the given user_id
@@ -68,6 +71,20 @@ public class OrdersService {
       }
       return filteredOrders;
   }
+
+    public List<Map<String, Object>> getAllOrder(Pageable pageable) {
+        Page<Orders> ordersList = ordersRepository.findAll(pageable);
+        return ordersList.map(order -> {
+            Map<String, Object> filteredOrder = new HashMap<>();
+            filteredOrder.put("orderId", order.getOrderId());
+            filteredOrder.put("status", order.getStatus());
+            filteredOrder.put("totalPrice", order.getTotalPrice());
+            filteredOrder.put("orderDate", order.getOrderDate());
+            filteredOrder.put("userId",order.getUser().getId());
+            return filteredOrder;
+        }).getContent();
+    }
+
 /*public List<Orders> getOrdersByUser(int userId, Pageable pageable) {
     Users user = new Users();
     user.setId(userId);
@@ -92,7 +109,19 @@ public class OrdersService {
         return ordersRepository.save(order);
     }
 
-    public List<Orders> getAllOrder() {
-      return ordersRepository.findAll();
+
+    public List<Map<String, Object>> getOrdersByOrderIds(int orderId) {
+
+        Orders ordersList = ordersRepository.findById(orderId).orElse(null);
+        List<Map<String, Object>> filteredOrders = new ArrayList<>();
+
+            Map<String, Object> filteredOrder = new HashMap<>();
+            filteredOrder.put("orderId", ordersList.getOrderId());
+            filteredOrder.put("status", ordersList.getStatus());
+            filteredOrder.put("totalPrice", ordersList.getTotalPrice());
+            filteredOrder.put("orderDate", ordersList.getOrderDate());
+            filteredOrders.add(filteredOrder);
+
+        return filteredOrders;
     }
 }
