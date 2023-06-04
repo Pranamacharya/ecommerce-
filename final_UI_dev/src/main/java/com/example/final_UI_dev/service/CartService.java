@@ -9,6 +9,8 @@ import com.example.final_UI_dev.repository.UsersRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.sql.SQLOutput;
 import java.util.*;
 
 
@@ -54,7 +56,7 @@ public class  CartService {
                     int currentMaxQuantity = (int) cartDetails.get("maxQuantity");
                     int newQuantity = currentQuantity + cart.getQuantity();
                     int newMaxQuantity = Math.max(currentMaxQuantity, cart.getProduct().getStock());
-                    Long newTotalPrice = (Long) cartDetails.get("totalPrice") + cart.getTotalPrice();
+                    Long newTotalPrice = (Long) cartDetails.get("totalPrice")+ cart.getTotalPrice();
                     cartDetails.put("quantity", newQuantity);
                     cartDetails.put("maxQuantity", newMaxQuantity);
                     cartDetails.put("totalPrice", newTotalPrice);
@@ -133,11 +135,28 @@ public class  CartService {
                     // Update the product in the database
                     productsRepository.save(product);
 
+                    // Calculate the price to be reduced
+                    long pricePerUnit = product.getPrice();
+                    long priceToReduce = pricePerUnit * cart.getQuantity();
+
+                    // Reduce the total price in the cart
+                    long updatedTotalPrice = cart.getTotalPrice() - priceToReduce;
+                    cart.setTotalPrice(updatedTotalPrice);
+
                     // Delete the cart entry
                     cartRepository.delete(cart);
                 } else {
                     // Decrease the cart item quantity by the specified quantity
                     cart.setQuantity(cart.getQuantity() - quantity);
+
+                    // Calculate the price to be reduced
+                    long pricePerUnit = cart.getProduct().getPrice();
+                    long priceToReduce = pricePerUnit * quantity;
+
+                    // Reduce the total price in the cart
+                    long updatedTotalPrice = cart.getTotalPrice() - priceToReduce;
+                    cart.setTotalPrice(updatedTotalPrice);
+
                     cartRepository.save(cart);
 
                     // Increase the stock by the refunded quantity
@@ -191,6 +210,7 @@ public class  CartService {
         long totalCartPrice = 0;
 
         for (Cart cart : cartList) {
+            System.out.println(cart.getTotalPrice());
             totalCartPrice += cart.getTotalPrice();
         }
 

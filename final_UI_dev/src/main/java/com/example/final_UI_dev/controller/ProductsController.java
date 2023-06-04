@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/products")
 public class ProductsController {
@@ -66,7 +66,9 @@ private ReviewService reviewService;
             response.put("name", product.getName());
             response.put("description", product.getDescription());
             response.put("price", product.getPrice());
-            response.put("imageUrl", product.getImageUrl());
+            //String imageUrl = product.getImageUrl().replace("\"", "");
+            response.put("imageUrl", "b1");
+           // response.put("imageUrl", product.getImageUrl());
             response.put("stock", product.getStock());
             response.put("brand", product.getBrand().getName());
             response.put("rating", reviewService.getAverageRatingForProduct(productId));
