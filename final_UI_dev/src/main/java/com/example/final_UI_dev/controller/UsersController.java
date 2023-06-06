@@ -1,9 +1,6 @@
 package com.example.final_UI_dev.controller;
 
-import com.example.final_UI_dev.entity.LoginRequest;
-import com.example.final_UI_dev.entity.LoginResponse;
-import com.example.final_UI_dev.entity.Tokens;
-import com.example.final_UI_dev.entity.Users;
+import com.example.final_UI_dev.entity.*;
 import com.example.final_UI_dev.repository.TokenRepository;
 import com.example.final_UI_dev.repository.UsersRepository;
 import com.example.final_UI_dev.service.JwtService;
@@ -17,10 +14,15 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.UnsupportedEncodingException;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -59,26 +61,7 @@ UsersController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
-    /*
-    @PostMapping("/login")
-    public ResponseEntity<String> authenticateAndGetToken(@RequestBody LoginRequest request) {
-        try {
-            System.out.println(request);
-            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getFirstname(), request.getPassword()));
-            if (authentication.isAuthenticated()) {
-                String token = jwtService.generateToken(request.getFirstname());
-                System.out.println(token);
-                return ResponseEntity.ok(token);
 
-            } else {
-                throw new UsernameNotFoundException("Invalid user request!");
-            }
-        } catch (AuthenticationException e) {
-            throw new BadCredentialsException("Invalid username or password", e);
-        }
-    }
-
-     */
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> authenticateAndGetToken(@RequestBody LoginRequest request) {
         try {
@@ -87,12 +70,28 @@ UsersController {
             if (authentication.isAuthenticated()) {
                 String token = jwtService.generateToken(request.getFirstname());
                 Optional<Users> use=usersRepository.findByEmail(request.getFirstname());
-                Tokens tok=tokenRepository.getTokenByUser(use.get());
-                tok.setToken(token);
-                tok.setCreation(new Date());
-                tokenRepository.save(tok);
-                System.out.println(token);
-                LoginResponse response = new LoginResponse(token);
+                if(use.isPresent()) {
+                    Optional<Tokens> tok = tokenRepository.getTokenByUser(use.get());
+                    if(tok.isPresent()) {
+                        tok.get().setToken(token);
+                        tok.get().setCreation(new Date());
+                        tokenRepository.save(tok.get());
+                        System.out.println(token);
+
+                    }
+                    else
+                    {
+                        Tokens tokens=new Tokens();
+                        tokens.setUser(use.get());
+                        tokens.setToken(token);
+                        tokens.setCreation(new Date());
+                        tokenRepository.save(tokens);
+                        System.out.println(token);
+
+
+                    }
+                }
+                LoginResponse response = new LoginResponse(token,use.get().getId());
                 return ResponseEntity.ok(response);
 
             } else {
@@ -105,14 +104,13 @@ UsersController {
     @PostMapping("/reset-password")
     public ResponseEntity<String> resetPassword(
             @RequestParam("email") String email,
-            @RequestParam("otp") String otp,
             @RequestParam("newPassword") String newPassword) {
        Users user = usersRepository.findByEmailIgnoreCase(email);
         if (user == null) {
             // Handle user not found error
         } else {
             try {
-               if(usersService.resetPassword(user, otp, newPassword))
+               if(usersService.resetPassword(user,newPassword))
                 return ResponseEntity.ok("Password reset successful");
                 else
                     return ResponseEntity.ok("failed");
@@ -123,6 +121,22 @@ UsersController {
 
         // Handle any other errors and return an appropriate response
         return null;
+    }
+    @GetMapping("/verify")
+    public ResponseEntity<?> verifyotp(@RequestBody otpverify otpv){
+        String otp=otpv.getOtp();
+        Optional<Users> user=usersRepository.findByEmail(otpv.getEmail());
+        if(user.isPresent()) {
+            boolean response = usersService.verifyOTP(user.get(),otp);
+            if(response){
+                return ResponseEntity.ok(true);
+            }
+            else
+                return ResponseEntity.ok(false);
+        }
+        else
+            return ResponseEntity.ok(false);
+
     }
 
     @PostMapping("/send-otp")
@@ -148,7 +162,25 @@ UsersController {
       // return ResponseEntity.ok("Signup successfull");
         return ResponseEntity.ok().body("{\"message\": \"Signup successful\"}");
     }
-
+    /*
+@GetMapping("/expire")
+public ResponseEntity<?> expiretime(@RequestBody Token token){
+        String tok=token.getToken();
+       Date response= jwtService.extractExpiration(tok);
+       return ResponseEntity.ok(response);
+}
+*/
+    @GetMapping("/expire")
+    public ResponseEntity<?> expireTime(@RequestBody Token token) {
+        String tok = token.getToken();
+        try {
+            boolean expirationDate = jwtService.isTokenExpired(tok);
+            return ResponseEntity.ok(expirationDate);
+        }
+        catch (Exception e){
+            return ResponseEntity.ok(true);
+        }
+    }
 @PostMapping("/change")
     public ResponseEntity<?> changepassword(
         @RequestParam("email") String email,
