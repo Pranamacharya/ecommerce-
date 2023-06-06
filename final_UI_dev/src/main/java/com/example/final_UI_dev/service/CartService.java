@@ -33,7 +33,7 @@ public class  CartService {
         return cartRepository.findAll();
     }
 
-    public List<Map<String, Object>> getCartByUserId(int userId) {
+    public List<Map<String, Object>> getCartByUsername(int userId) {
         Users users = usersRepository.findById(userId).orElse(null);
         List<Cart> cartList = cartRepository.findByUser(users);
         Map<String, Map<String, Object>> cartDetailsMap = new HashMap<>();

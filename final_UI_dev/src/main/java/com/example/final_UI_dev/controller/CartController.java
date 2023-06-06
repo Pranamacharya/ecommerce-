@@ -4,12 +4,24 @@ import com.example.final_UI_dev.entity.Cart;
 import com.example.final_UI_dev.entity.Products;
 import com.example.final_UI_dev.entity.Users;
 import com.example.final_UI_dev.repository.CartRepository;
+import com.example.final_UI_dev.repository.TokenRepository;
 import com.example.final_UI_dev.repository.UsersRepository;
 import com.example.final_UI_dev.service.CartService;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwt;
+import io.jsonwebtoken.Jwts;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.HashMap;
 import java.util.List;
@@ -27,18 +39,44 @@ public class CartController {
     private UsersRepository usersRepository;
     @Autowired
     private CartRepository cartRepository;
+    @Autowired
+    TokenRepository tokenRepository;
 
     @GetMapping("/getAll")
     public ResponseEntity<List<Cart>> getAllCarts() {
         List<Cart> carts = cartService.getAllCarts();
         return new ResponseEntity<>(carts, HttpStatus.OK);
     }
+    private String extractUsernameFromToken(String token) {
+        // Parse the token and retrieve the claims
+        Claims claims = Jwts.parser().setSigningKey("yourSigningKey").parseClaimsJws(token).getBody();
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<?> getCartByUserId(@PathVariable int userId) {
-        List<Map<String, Object>> cart = cartService.getCartByUserId(userId);
+        // Extract the username from the claims
+        String username = claims.get("username", String.class);
+
+        return username;
+    }
+
+
+
+  /*  @GetMapping("/cart/{userId}")
+    public ResponseEntity<?> getCartByUserId(@RequestHeader("Authorization") String authorizationHeader) {
+        // Extract the token from the authorization header
+        String token = authorizationHeader.replace("Bearer ", "");
+        int id=tokenRepository.findUserIdByToken(token);
+        System.out.println(id);
+
+        // Use the token to retrieve the cart from the service
+        List<Map<String, Object>> cart = cartService.getCartByUsername(id);
+
         return ResponseEntity.ok(cart);
     }
+    */
+  @GetMapping("/{userId}")
+  public ResponseEntity<?> getCartByUserId(@PathVariable int userId) {
+      List<Map<String, Object>> cart = cartService.getCartByUsername(userId);
+      return ResponseEntity.ok(cart);
+  }
 
     @GetMapping("/{userId}/{productId}")
     public ResponseEntity<?> getCartByUserId(@PathVariable int userId,@PathVariable int productId ) {

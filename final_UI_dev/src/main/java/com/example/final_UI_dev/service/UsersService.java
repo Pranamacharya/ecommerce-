@@ -81,14 +81,14 @@ public class UsersService {
             //  ConfirmationToken = new ConfirmationToken(userEntity);
             //  confirmationTokenRepository.save(confirmationToken);
 
-            SimpleMailMessage mailMessage = new SimpleMailMessage();
-            mailMessage.setTo(userEntity.getEmail());
-            mailMessage.setSubject("Complete Registration!");
-            mailMessage.setText("To confirm your account, please click here : "
-                    + "http://localhost:8080/categories");
-            emailService.sendEmail(mailMessage);
+           // SimpleMailMessage mailMessage = new SimpleMailMessage();
+           // mailMessage.setTo(userEntity.getEmail());
+           // mailMessage.setSubject("Complete Registration!");
+           // mailMessage.setText("To confirm your account, please click here : "
+           //         + "http://localhost:8080/categories");
+          //  emailService.sendEmail(mailMessage);
         }
-        return ResponseEntity.ok("Registration successful. Please check your email (" + userEntity.getEmail() + ") to confirm your account.");
+        return ResponseEntity.ok("Registration successful!");
 
     }
 
@@ -149,22 +149,13 @@ public class UsersService {
     }
 
 
-    public boolean resetPassword(Users user, String enteredOTP, String newPassword)
+    public boolean resetPassword(Users user,String newPassword)
             throws UnsupportedEncodingException, MessagingException {
-        if (verifyOTP(user, enteredOTP)) {
-            // OTP is correct, allow password reset
-
             String encodedPassword = passwordEncoder.encode(newPassword);
             user.setPassword(encodedPassword);
             usersRepository.save(user);
             return true;
 
-            // Send confirmation email or perform other necessary actions
-
-        } else {
-            // OTP is incorrect, handle the error (throw an exception, return a response, etc.)
-            return false;
-        }
     }
 /*
     public boolean changePassword(String email, String old, String nw)
