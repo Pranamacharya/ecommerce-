@@ -8,6 +8,7 @@ import com.example.final_UI_dev.repository.ProductsRepository;
 import com.example.final_UI_dev.repository.UsersRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Service;
 
 import java.sql.SQLOutput;
@@ -68,7 +69,7 @@ public class  CartService {
 
 
 
-    public String addProductToCart(int userId, int productId, int quantity) {
+ /*   public String addProductToCart(int userId, int productId, int quantity) {
         Products product = productService.getProductById(productId).orElse(null);
         if (product == null) {
             throw new RuntimeException("Product not found");
@@ -93,7 +94,47 @@ public class  CartService {
         cartRepository.save(cart);
         return "Product added to cart";
         //return ;
-    }
+    }*/
+
+ public String addProductToCart(int userId, int productId, int quantity) {
+     Products product = productService.getProductById(productId).orElse(null);
+     if (product == null) {
+         throw new RuntimeException("Product not found");
+     }
+     Users user = usersRepository.findById(userId).orElse(null);
+     Products products = productsRepository.findById(productId).orElse(null);
+     Cart cart = cartRepository.findByUserAndProduct(user, products);
+
+     if (cart != null) {
+         int updatedQuantity = cart.getQuantity() + quantity;
+         if (updatedQuantity > product.getStock()) {
+             throw new RuntimeException("Insufficient stock");
+         }
+
+         cart.setQuantity(updatedQuantity);
+         Long totalPrice = product.getPrice() * updatedQuantity;
+         cart.setTotalPrice(totalPrice);
+     } else {
+         if (quantity > product.getStock()) {
+             throw new RuntimeException("Insufficient stock");
+         }
+
+         cart = new Cart();
+         cart.setUser(usersRepository.findById(userId).orElse(null));
+         cart.setProduct(product);
+         cart.setQuantity(quantity);
+         cart.setPrice(product.getPrice());
+         Long totalPrice = product.getPrice() * quantity;
+         cart.setTotalPrice(totalPrice);
+     }
+
+     // Deduct the ordered quantity from the stock
+     int remainingStock = product.getStock() - quantity;
+     product.setStock(remainingStock);
+     productsRepository.save(product);
+     cartRepository.save(cart);
+     return "Product added to cart";
+ }
 
     public void deleteProduct(int userId, int productId) {
         Users user = usersRepository.findById(userId).orElse(null);
@@ -236,7 +277,39 @@ public class  CartService {
     }
 
 
-
+    public int getCartSizeByUserId(int userId) {
+        Users users = usersRepository.findById(userId).orElse(null);
+        List<Cart> cartList = cartRepository.findByUser(users);
+        Map<String, Map<String, Object>> cartDetailsMap = new HashMap<>();
+        for (Cart cart : cartList) {
+            if (cart.getProduct() != null) {
+                String productName = cart.getProduct().getName();
+                if (!cartDetailsMap.containsKey(productName)) {
+                    Map<String, Object> cartDetails = new HashMap<>();
+                    cartDetails.put("name", productName);
+                    cartDetails.put("id",cart.getProduct().getProductId());
+                    cartDetails.put("image", cart.getProduct().getImageUrl());
+                    cartDetails.put("price", cart.getProduct().getPrice());
+                    cartDetails.put("quantity", cart.getQuantity());
+                    cartDetails.put("totalPrice", cart.getTotalPrice());
+                    cartDetails.put("maxQuantity", cart.getProduct().getStock());
+                    cartDetailsMap.put(productName, cartDetails);
+                } else {
+                    Map<String, Object> cartDetails = cartDetailsMap.get(productName);
+                    cartDetails.put("id",cart.getProduct().getProductId());
+                    int currentQuantity = (int) cartDetails.get("quantity");
+                    int currentMaxQuantity = (int) cartDetails.get("maxQuantity");
+                    int newQuantity = currentQuantity + cart.getQuantity();
+                    int newMaxQuantity = Math.max(currentMaxQuantity, cart.getProduct().getStock());
+                    Long newTotalPrice = (Long) cartDetails.get("totalPrice")+ cart.getTotalPrice();
+                    cartDetails.put("quantity", newQuantity);
+                    cartDetails.put("maxQuantity", newMaxQuantity);
+                    cartDetails.put("totalPrice", newTotalPrice);
+                }
+            }
+        }
+        return cartDetailsMap.size();
+    }
 }
 
 

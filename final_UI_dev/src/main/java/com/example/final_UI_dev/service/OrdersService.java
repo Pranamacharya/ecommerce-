@@ -1,127 +1,137 @@
 package com.example.final_UI_dev.service;
-
-import com.example.final_UI_dev.entity.*;
+import com.example.final_UI_dev.entity.Cart;
+import com.example.final_UI_dev.entity.OrderItem;
+import com.example.final_UI_dev.entity.Orders;
+import com.example.final_UI_dev.entity.Users;
 import com.example.final_UI_dev.repository.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.format.TextStyle;
+import java.util.*;
 
 @Service
 public class OrdersService {
     @Autowired
-    private OrdersRepository ordersRepository;
+    private UsersRepository usersRepository;
     @Autowired
     private CartRepository cartRepository;
     @Autowired
-    private UsersRepository usersRepository;
+    private ShippingAddressRepository shippingAddressRepository;
     @Autowired
     private ProductsRepository productsRepository;
-    @Autowired
-    private ShippingAddressRepository shippingAddressRepository;
-
-
     @Transactional
-    public void placeOrder(int userId) {
-        // Get all items in the cart for the given user_id
-        List<Cart> cartList = cartRepository.findByUser(usersRepository.findById(userId).orElse(null));
+    public Boolean placeOrder(int userId) {
+        Users user = usersRepository.findById(userId).orElse(null);
+        List<Cart> cartList = cartRepository.findByUser(user);
 
-        // Create an orders entry for each item in the cart
-        for (Cart cart : cartList) {
-            if(cart.getProduct()!=null) {
-                Orders order = new Orders();
-                order.setUser(usersRepository.findById(userId).orElse(null));
-                //order.setUserId(userId);
-                order.setProduct(productsRepository.findById(cart.getProduct().getProductId()).orElse(null));
-                // order.setProductId(cart.getProduct().getId());
-                order.setQuantity(cart.getQuantity());
-                order.setPrice(cart.getPrice());
-                order.setTotalPrice(cart.getTotalPrice());
-                order.setOrderDate(LocalDateTime.now());
-                order.setStatus("Processing");
-                order.setShippingAddress(shippingAddressRepository.findByUserId(userId));
-                ordersRepository.save(order);
+        if (cartList.size() != 0) {
+            Orders order = new Orders();
+            order.setUser(user);
+            order.setOrderDate(LocalDateTime.now());
+            order.setStatus("Processing");
+            order.setShippingAddress(shippingAddressRepository.findByUserId(userId));
+
+            List<OrderItem> orderItems = new ArrayList<>();
+
+            for (Cart cart : cartList) {
+                if (cart.getProduct() != null) {
+                    OrderItem orderItem = new OrderItem();
+                    orderItem.setOrder(order);
+                    orderItem.setProduct(productsRepository.findById(cart.getProduct().getProductId()).orElse(null));
+                    orderItem.setQuantity(cart.getQuantity());
+                    orderItems.add(orderItem);
+                }
             }
+
+            order.setOrderItems(orderItems);
+            ordersRepository.save(order);
+
+            // Delete all items in the cart for the given user_id
+            cartRepository.deleteAllByUser(user);
+            return true;
+        } else {
+            return false;
         }
-        // Delete all items in the cart for the given user_id
-        cartRepository.deleteAllByUser(usersRepository.findById(userId).orElse(null));
+    }
+@Autowired
+private OrdersRepository ordersRepository;
+
+    public List<Object> getOrdersByUser(int userId, Pageable pageable) {
+        Users user = new Users();
+        user.setId(userId);
+        List<Orders> ordersList = ordersRepository.findByUser(user, pageable);
+
+        // Sort the orders by order date
+        ordersList.sort(Comparator.comparing(Orders::getOrderDate));
+
+        List<Object> orders = new ArrayList<>();
+        for (Orders order : ordersList) {
+            HashMap<String, Object> orderDetails = new HashMap<>();
+            orderDetails.put("orderId", order.getOrderId());
+            orderDetails.put("status", order.getStatus());
+
+            // Convert order date to "6th June 2023" format
+            LocalDateTime orderDate = order.getOrderDate();
+            int day = orderDate.getDayOfMonth();
+            String formattedDate = getFormattedDate(orderDate);
+            orderDetails.put("orderDate", formattedDate);
+
+            List<HashMap<String, Object>> orderItems = new ArrayList<>();
+            Long totalPrice = 0L;
+
+            for (OrderItem orderItem : order.getOrderItems()) {
+                HashMap<String, Object> itemDetails = new HashMap<>();
+                //itemDetails.put("productId", orderItem.getProduct().getProductId());
+                itemDetails.put("productName", orderItem.getProduct().getName());
+                itemDetails.put("quantity", orderItem.getQuantity());
+                itemDetails.put("price", orderItem.getProduct().getPrice()); // Assuming price is a field in the Product class
+                Long itemTotalPrice = orderItem.getQuantity() * orderItem.getProduct().getPrice(); // Calculating total price based on quantity and product price
+                itemDetails.put("totalPrice", itemTotalPrice);
+                orderItems.add(itemDetails);
+                totalPrice += itemTotalPrice;
+            }
+
+            orderDetails.put("orderItems", orderItems);
+            orderDetails.put("totalPrice", totalPrice);
+
+            orders.add(orderDetails);
+        }
+
+        return orders;
+    }
+
+    private String getFormattedDate(LocalDateTime dateTime) {
+        int day = dateTime.getDayOfMonth();
+        String ordinalIndicator = getOrdinalIndicator(day);
+        String month = dateTime.getMonth().getDisplayName(TextStyle.FULL, Locale.ENGLISH);
+        int year = dateTime.getYear();
+
+        return day + ordinalIndicator + " " + month + " " + year;
+    }
+
+    private String getOrdinalIndicator(int day) {
+        if (day >= 11 && day <= 13) {
+            return "th";
+        }
+
+        int lastDigit = day % 10;
+        switch (lastDigit) {
+            case 1:
+                return "st";
+            case 2:
+                return "nd";
+            case 3:
+                return "rd";
+            default:
+                return "th";
+        }
     }
 
 
 
-  public List<Map<String, Object>> getOrdersByUser(int userId, Pageable pageable) {
-      Users user = new Users();
-      user.setId(userId);
-      List<Orders> ordersList = ordersRepository.findByUser(user, pageable);
-      List<Map<String, Object>> filteredOrders = new ArrayList<>();
-      for (Orders order : ordersList) {
-          Map<String, Object> filteredOrder = new HashMap<>();
-          filteredOrder.put("orderId", order.getOrderId());
-          filteredOrder.put("status", order.getStatus());
-          filteredOrder.put("totalPrice", order.getTotalPrice());
-          filteredOrder.put("orderDate", order.getOrderDate());
-          filteredOrders.add(filteredOrder);
-      }
-      return filteredOrders;
-  }
 
-    public List<Map<String, Object>> getAllOrder(Pageable pageable) {
-        Page<Orders> ordersList = ordersRepository.findAll(pageable);
-        return ordersList.map(order -> {
-            Map<String, Object> filteredOrder = new HashMap<>();
-            filteredOrder.put("orderId", order.getOrderId());
-            filteredOrder.put("status", order.getStatus());
-            filteredOrder.put("totalPrice", order.getTotalPrice());
-            filteredOrder.put("orderDate", order.getOrderDate());
-            filteredOrder.put("userId",order.getUser().getId());
-            return filteredOrder;
-        }).getContent();
-    }
-
-/*public List<Orders> getOrdersByUser(int userId, Pageable pageable) {
-    Users user = new Users();
-    user.setId(userId);
-    return ordersRepository.findByUser(user, pageable);
-}*/
-
-
-
-    public List<Orders> getOrdersByProduct(int productId) {
-        Products product = new Products();
-        product.setProductId(productId);
-        return ordersRepository.findByProduct(product);
-    }
-
-    public List<Orders> getOrdersByShippingAddress(int shippingAddressId) {
-        ShippingAddress shippingAddress = new ShippingAddress();
-        shippingAddress.setId(shippingAddressId);
-        return ordersRepository.findByShippingAddress(shippingAddress);
-    }
-
-    public Orders addOrder(Orders order) {
-        return ordersRepository.save(order);
-    }
-
-
-    public List<Map<String, Object>> getOrdersByOrderIds(int orderId) {
-
-        Orders ordersList = ordersRepository.findById(orderId).orElse(null);
-        List<Map<String, Object>> filteredOrders = new ArrayList<>();
-
-            Map<String, Object> filteredOrder = new HashMap<>();
-            filteredOrder.put("orderId", ordersList.getOrderId());
-            filteredOrder.put("status", ordersList.getStatus());
-            filteredOrder.put("totalPrice", ordersList.getTotalPrice());
-            filteredOrder.put("orderDate", ordersList.getOrderDate());
-            filteredOrders.add(filteredOrder);
-
-        return filteredOrders;
-    }
 }

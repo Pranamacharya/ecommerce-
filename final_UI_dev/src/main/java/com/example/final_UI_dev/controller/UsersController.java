@@ -124,6 +124,7 @@ UsersController {
         // Handle any other errors and return an appropriate response
         return null;
     }
+
     @PostMapping("/send-otp")
     public void otp(@RequestParam("email") String email){
     Users user = usersRepository.findByEmailIgnoreCase(email);

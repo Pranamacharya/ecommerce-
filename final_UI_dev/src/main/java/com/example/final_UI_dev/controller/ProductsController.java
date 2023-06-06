@@ -10,16 +10,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
+
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/products")
 public class ProductsController {
+    @Autowired
+    private ProductsRepository productsRepository;
 
+    @Autowired
+    private ReviewRepository reviewRepository;
+
+    @Autowired
+    private ReviewService reviewService;
     @Autowired
     private ProductsService productsService;
 
@@ -35,23 +42,6 @@ public class ProductsController {
         return new ResponseEntity<>(products, HttpStatus.OK);
     }
 
-/*    @GetMapping("/{productId}")
-    public ResponseEntity<Products> getProductById(@PathVariable("productId") int productId) {
-        Optional<Products> product = productsService.getProductById(productId);
-        if (product.isPresent()) {
-            return new ResponseEntity<>(product.get(), HttpStatus.OK);
-        }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }*/
-
-@Autowired
-private ProductsRepository productsRepository;
-
-@Autowired
-private ReviewRepository reviewRepository;
-
-@Autowired
-private ReviewService reviewService;
     @GetMapping("/{productId}")
     public ResponseEntity<Map<String, Object>> getProductById(@PathVariable int productId) {
 
@@ -61,17 +51,14 @@ private ReviewService reviewService;
 
         if (optionalProduct.isPresent()) {
             Products product = optionalProduct.get();
-
             response.put("productId", product.getProductId());
             response.put("name", product.getName());
             response.put("description", product.getDescription());
             response.put("price", product.getPrice());
-            //String imageUrl = product.getImageUrl().replace("\"", "");
             response.put("imageUrl", "b1");
-           // response.put("imageUrl", product.getImageUrl());
             response.put("stock", product.getStock());
             response.put("brand", product.getBrand().getName());
-            response.put("rating", reviewService.getAverageRatingForProduct(productId));
+            response.put("rating",Math.round(reviewService.getAverageRatingForProduct(productId) * 100.0) / 100.0);
             List<Map<String, Object>> filteredReviews = new ArrayList<>();
 
             for (Review review : reviews) {
@@ -92,7 +79,8 @@ private ReviewService reviewService;
                     formattedDate = "Today";
                 }
                 Map<String, Object> filteredReview = new HashMap<>();
-                filteredReview.put("rating", review.getRating());
+                double rating = review.getRating();
+                filteredReview.put("rating", rating);
                 filteredReview.put("comment", review.getComment());
                 filteredReview.put("reviewDate", formattedDate);
                 filteredReview.put("userEmail", review.getUser().getEmail());
@@ -120,9 +108,6 @@ private ReviewService reviewService;
         productsService.deleteProduct(productId);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-
-
-
     @GetMapping("/search")          //search bar
     public List<Products> searchProductsByName(@RequestParam("name") String name) {
         return productsService.searchProductsByName(name);
@@ -132,5 +117,6 @@ private ReviewService reviewService;
         List<String> productNames = productsService.getAllProductNames();
         return ResponseEntity.ok(productNames);
     }
+
 }
 

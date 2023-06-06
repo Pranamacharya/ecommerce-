@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("/carts")
@@ -86,7 +87,11 @@ public class CartController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
+    @GetMapping("/getSizeOfCart/{userId}")
+    public ResponseEntity<?> getSizeOfCartById(@PathVariable int userId) {
+        int size = cartService.getCartSizeByUserId(userId);
+        return ResponseEntity.ok(size);
+    }
 }
 
 

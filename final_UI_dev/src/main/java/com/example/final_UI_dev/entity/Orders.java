@@ -1,8 +1,7 @@
 package com.example.final_UI_dev.entity;
-
 import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "orders")
@@ -17,22 +16,12 @@ public class Orders {
     @JoinColumn(name = "user_id")
     private Users user;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "product_id")
-    private Products product;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<OrderItem> orderItems;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "shipping_addresses_id")
     private ShippingAddress shippingAddress;
-
-    @Column(name = "quantity")
-    private int quantity;
-
-    @Column(name = "price")
-    private Long price;
-
-    @Column(name = "total_price")
-    private Long totalPrice;
 
     @Column(name = "order_date")
     private LocalDateTime orderDate;
@@ -42,18 +31,15 @@ public class Orders {
 
     // getters and setters
 
-
-    public Orders(Integer orderId, Users user, Products product, ShippingAddress shippingAddress, int quantity, Long price, Long totalPrice, LocalDateTime orderDate, String status) {
+    public Orders(Integer orderId, Users user, List<OrderItem> orderItems, ShippingAddress shippingAddress, LocalDateTime orderDate, String status) {
         this.orderId = orderId;
         this.user = user;
-        this.product = product;
+        this.orderItems = orderItems;
         this.shippingAddress = shippingAddress;
-        this.quantity = quantity;
-        this.price = price;
-        this.totalPrice = totalPrice;
         this.orderDate = orderDate;
         this.status = status;
     }
+
     public Orders() {
     }
 
@@ -73,12 +59,12 @@ public class Orders {
         this.user = user;
     }
 
-    public Products getProduct() {
-        return product;
+    public List<OrderItem> getOrderItems() {
+        return orderItems;
     }
 
-    public void setProduct(Products product) {
-        this.product = product;
+    public void setOrderItems(List<OrderItem> orderItems) {
+        this.orderItems = orderItems;
     }
 
     public ShippingAddress getShippingAddress() {
@@ -87,30 +73,6 @@ public class Orders {
 
     public void setShippingAddress(ShippingAddress shippingAddress) {
         this.shippingAddress = shippingAddress;
-    }
-
-    public int getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
-
-    public Long getPrice() {
-        return price;
-    }
-
-    public void setPrice(Long price) {
-        this.price = price;
-    }
-
-    public Long getTotalPrice() {
-        return totalPrice;
-    }
-
-    public void setTotalPrice(Long totalPrice) {
-        this.totalPrice = totalPrice;
     }
 
     public LocalDateTime getOrderDate() {
