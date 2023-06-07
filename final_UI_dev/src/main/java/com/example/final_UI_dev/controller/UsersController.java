@@ -122,10 +122,29 @@ UsersController {
         // Handle any other errors and return an appropriate response
         return null;
     }
+    /*
     @GetMapping("/verify")
     public ResponseEntity<?> verifyotp(@RequestBody otpverify otpv){
         String otp=otpv.getOtp();
         Optional<Users> user=usersRepository.findByEmail(otpv.getEmail());
+        if(user.isPresent()) {
+            boolean response = usersService.verifyOTP(user.get(),otp);
+            if(response){
+                return ResponseEntity.ok(true);
+            }
+            else
+                return ResponseEntity.ok(false);
+        }
+        else
+            return ResponseEntity.ok(false);
+
+    }
+
+     */
+    @PostMapping("/verify")
+    public ResponseEntity<?> verifyOtp(@RequestParam("otp") String otp,
+                                       @RequestParam("email") String email){
+        Optional<Users> user=usersRepository.findByEmail(email);
         if(user.isPresent()) {
             boolean response = usersService.verifyOTP(user.get(),otp);
             if(response){
