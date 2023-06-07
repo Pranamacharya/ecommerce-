@@ -55,7 +55,7 @@ public class ProductsController {
             response.put("name", product.getName());
             response.put("description", product.getDescription());
             response.put("price", product.getPrice());
-            response.put("imageUrl", "b1");
+            response.put("imageUrl", product.getImageUrl());
             response.put("stock", product.getStock());
             response.put("brand", product.getBrand().getName());
             response.put("rating",Math.round(reviewService.getAverageRatingForProduct(productId) * 100.0) / 100.0);
