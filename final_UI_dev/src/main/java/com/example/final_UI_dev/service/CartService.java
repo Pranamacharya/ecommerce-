@@ -96,45 +96,45 @@ public class  CartService {
         //return ;
     }*/
 
- public String addProductToCart(int userId, int productId, int quantity) {
-     Products product = productService.getProductById(productId).orElse(null);
-     if (product == null) {
-         throw new RuntimeException("Product not found");
-     }
-     Users user = usersRepository.findById(userId).orElse(null);
-     Products products = productsRepository.findById(productId).orElse(null);
-     Cart cart = cartRepository.findByUserAndProduct(user, products);
+    public String addProductToCart(int userId, int productId, int quantity) {
+        Products product = productService.getProductById(productId).orElse(null);
+        if (product == null) {
+            throw new RuntimeException("Product not found");
+        }
+        Users user = usersRepository.findById(userId).orElse(null);
+        Products products = productsRepository.findById(productId).orElse(null);
+        Cart cart = cartRepository.findByUserAndProduct(user, products);
 
-     if (cart != null) {
-         int updatedQuantity = cart.getQuantity() + quantity;
-         if (updatedQuantity > product.getStock()) {
-             throw new RuntimeException("Insufficient stock");
-         }
+        if (cart != null) {
+            int updatedQuantity = cart.getQuantity() + quantity; //quantity > product.getStock()
+            if (product.getStock()==0) {
+                throw new RuntimeException("Insufficient stock");
+            }
 
-         cart.setQuantity(updatedQuantity);
-         Long totalPrice = product.getPrice() * updatedQuantity;
-         cart.setTotalPrice(totalPrice);
-     } else {
-         if (quantity > product.getStock()) {
-             throw new RuntimeException("Insufficient stock");
-         }
+            cart.setQuantity(updatedQuantity);
+            Long totalPrice = product.getPrice() * updatedQuantity;
+            cart.setTotalPrice(totalPrice);
+        } else {
+            if (quantity > product.getStock()) {
+                throw new RuntimeException("Insufficient stock");
+            }
 
-         cart = new Cart();
-         cart.setUser(usersRepository.findById(userId).orElse(null));
-         cart.setProduct(product);
-         cart.setQuantity(quantity);
-         cart.setPrice(product.getPrice());
-         Long totalPrice = product.getPrice() * quantity;
-         cart.setTotalPrice(totalPrice);
-     }
+            cart = new Cart();
+            cart.setUser(usersRepository.findById(userId).orElse(null));
+            cart.setProduct(product);
+            cart.setQuantity(quantity);
+            cart.setPrice(product.getPrice());
+            Long totalPrice = product.getPrice() * quantity;
+            cart.setTotalPrice(totalPrice);
+        }
 
-     // Deduct the ordered quantity from the stock
-     int remainingStock = product.getStock() - quantity;
-     product.setStock(remainingStock);
-     productsRepository.save(product);
-     cartRepository.save(cart);
-     return "Product added to cart";
- }
+        // Deduct the ordered quantity from the stock
+        int remainingStock = product.getStock() - quantity;
+        product.setStock(remainingStock);
+        productsRepository.save(product);
+        cartRepository.save(cart);
+        return "Product added to cart";
+    }
 
     public void deleteProduct(int userId, int productId) {
         Users user = usersRepository.findById(userId).orElse(null);
