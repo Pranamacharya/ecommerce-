@@ -159,20 +159,29 @@ UsersController {
     }
 
     @PostMapping("/send-otp")
-    public void otp(@RequestParam("email") String email){
-    Users user = usersRepository.findByEmailIgnoreCase(email);
-        if (user == null) {
-        // Handle user not found error
-    } else {
+    public ResponseEntity<?> otp(@RequestParam("email") String email){
         try {
-            usersService.generateOneTimePassword(user);
-        } catch (UnsupportedEncodingException | MessagingException e) {
-            // Handle email sending or other errors
-        }
-    }
+            Users user = usersRepository.findByEmailIgnoreCase(email);
 
-    // Handle any other errors and return an appropriate response
-}
+            if (user == null) {
+                // Handle user not found error
+                return ResponseEntity.badRequest().body("Email does not exist!");
+            } else {
+                try {
+                    usersService.generateOneTimePassword(user);
+                } catch (UnsupportedEncodingException | MessagingException e) {
+                    // Handle email sending or other errors
+                    return ResponseEntity.internalServerError().body("could not serve your request");
+                }
+            }
+        }
+        catch(Exception e){
+            return ResponseEntity.badRequest().body("User with his email doesnot exist");
+        }
+        return ResponseEntity.ok("OTP sent");
+
+        }
+
 
 
     @PostMapping("/add")
@@ -208,7 +217,7 @@ public ResponseEntity<?> expiretime(@RequestBody Token token){
        if(usersService.changePassword(email,old,nw))
           return  ResponseEntity.ok("Password changed successfully");
        else
-          return ResponseEntity.ok("Either email or password is incorrect");
+          return ResponseEntity.badRequest().body("Either email or password is incorrect");
 }
 }
 
